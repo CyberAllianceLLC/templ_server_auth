@@ -7,7 +7,6 @@
     "dev": "nodemon ./bin/www"
   },
   "dependencies": {
-    "aws-sdk": "^2.6.15",
     "body-parser": "~1.18.3",
     "cookie-parser": "~1.4.3",
     "cron": "^1.2.1",

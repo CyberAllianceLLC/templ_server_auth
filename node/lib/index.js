@@ -26,11 +26,7 @@ exports.config = {
     connection: config.DB,
     debug: false
   }),
-  AWS: {
-    PUB: config.AWS.PUB,
-    PRIV: config.AWS.PRIV,
-    REGION: config.AWS.REGION
-  }
+  SMTP: config.SMTP
 };
 
 //Libraries

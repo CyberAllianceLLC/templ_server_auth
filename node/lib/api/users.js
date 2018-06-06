@@ -1,16 +1,12 @@
 var q = require('q');
 var j = require('joi');
 var crypto = require('crypto');
-var aws = require('aws-sdk');
+var nodemailer = require('nodemailer');
 
 var lib = require('../index.js');
 var knex = lib.config.DB;
 
-var ses = new aws.SES({
-  accessKeyId: lib.config.AWS.PUB,
-  secretAccessKey: lib.config.AWS.PRIV,
-  region: lib.config.AWS.REGION
-});
+var nm = nodemailer.createTransport(lib.config.SMTP);
 
 var users = {};
 
@@ -90,33 +86,20 @@ users.newUser = function (query) {
       var email = user[0].email;
       var recovery_key = user[0].recovery_key;
 
-      var message = 'An email verification has been requested for your {website name} account. \n \n To verify your email for {website name}, please visit this link: \n https://{website name}.com/verifyEmail/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using {website name}!';
-
-      //send the email through AWS SES
+      //send email through SMTP
       return q.Promise(function (resolve, reject, notify) {
-        var params = {
-          Destination: {
-            ToAddresses: [
-              email
-            ]
-          },
-          Message: {
-            Subject: {
-              Data: 'Verify Email - {website name}'
-            },
-            Body: {
-              Text: {
-                Data: message
-              }
-            }
-          },
-          Source: '{website name} <noreply@{website name}.com>'
+        var mailOptions = {
+          to: email,
+          from: '{website name} <noreply@{website name}.com>',
+          subject: 'Verify Email - {website name}',
+          text: 'An email verification has been requested for your {website name} account. \n \n To verify your email for {website name}, please visit this link: \n https://{website name}.com/verifyEmail/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using {website name}!'
         };
-        ses.sendEmail(params, function(err, data) {
-          if(err){
-            reject(err);
+
+        nm.sendMail(mailOptions, function(error, info) {
+          if(error){
+            reject(error);
           }else{
-            resolve(data);
+            resolve(info);
           }
         });
       });
@@ -229,33 +212,20 @@ users.sendRecoveryEmail = function (query) {
       var email = user[0].email;
       var recovery_key = user[0].recovery_key;
 
-      var message = 'A password reset has been requested for your {website name} account. \n \n If you did not make this request, you can safely ignore this email. A password reset request can be made by anyone, and it does not indicate that your account is in any danger of being accessed by someone else. \n \n If you do actually want to reset your password, visit this link: \n https://{website name}.com/verifyRecover/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) + '\n \n Thank you for using {website name}!';
-
-      //send recovery email through AWS SES
+      //send email through SMTP
       return q.Promise(function (resolve, reject, notify) {
-        var params = {
-          Destination: {
-            ToAddresses: [
-              email
-            ]
-          },
-          Message: {
-            Subject: {
-              Data: 'Account Recovery - {website name}'
-            },
-            Body: {
-              Text: {
-                Data: message
-              }
-            }
-          },
-          Source: '{website name} <noreply@{website name}.com>'
+        var mailOptions = {
+          to: email,
+          from: '{website name} <noreply@{website name}.com>',
+          subject: 'Account Recovery - {website name}',
+          text: 'A password reset has been requested for your {website name} account. \n \n If you did not make this request, you can safely ignore this email. A password reset request can be made by anyone, and it does not indicate that your account is in any danger of being accessed by someone else. \n \n If you do actually want to reset your password, visit this link: \n https://{website name}.com/verifyRecover/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) + '\n \n Thank you for using {website name}!'
         };
-        ses.sendEmail(params, function(err, data) {
-          if(err){
-            reject(err);
+
+        nm.sendMail(mailOptions, function(error, info) {
+          if(error){
+            reject(error);
           }else{
-            resolve(data);
+            resolve(info);
           }
         });
       });
@@ -386,33 +356,20 @@ users.newEmail = function (auth, query) {
       var email = data.email;
       var recovery_key = user[0].recovery_key;
 
-      var message = 'An email verification has been requested for your {website name} account. \n \n To verify your email for {website name}, please visit this link: \n https://{website name}.com/verifyEmail/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using {website name}!';
-
-      //send the email through AWS SES
+      //send email through SMTP
       return q.Promise(function (resolve, reject, notify) {
-        var params = {
-          Destination: {
-            ToAddresses: [
-              email
-            ]
-          },
-          Message: {
-            Subject: {
-              Data: 'Verify Email - {website name}'
-            },
-            Body: {
-              Text: {
-                Data: message
-              }
-            }
-          },
-          Source: '{website name} <noreply@{website name}.com>'
+        var mailOptions = {
+          to: email,
+          from: '{website name} <noreply@{website name}.com>',
+          subject: 'Verify Email - {website name}',
+          text: 'An email verification has been requested for your {website name} account. \n \n To verify your email for {website name}, please visit this link: \n https://{website name}.com/verifyEmail/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using {website name}!'
         };
-        ses.sendEmail(params, function(err, data) {
-          if(err){
-            reject(err);
+
+        nm.sendMail(mailOptions, function(error, info) {
+          if(error){
+            reject(error);
           }else{
-            resolve(data);
+            resolve(info);
           }
         });
       });
