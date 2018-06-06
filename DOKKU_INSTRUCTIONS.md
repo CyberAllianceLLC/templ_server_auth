@@ -17,11 +17,12 @@ SETUP
  `$ ssh root@<IP address>`  
 
 ## setup dokku (server)
- `$ wget https://raw.githubusercontent.com/dokku/dokku/v0.10.5/bootstrap.sh`  
- `$ sudo DOKKU_TAG=v0.10.5 bash bootstrap.sh`  
+ - input the following commands with the appropriate version numbers, see [Dokku homepage](http://dokku.viewdocs.io/dokku/)  
+ `$ wget https://raw.githubusercontent.com/dokku/dokku/<version>/bootstrap.sh`  
+ `$ sudo DOKKU_TAG=<version> bash bootstrap.sh`  
  - goto `http://<IP address>`
  - fill out required fields
- - replace IP address with your website name on the dokku landing page
+ - on the dokku landing page, replace the IP address with your website name
  - follow on-screen instructions
 
 ## setup postgres (server)
@@ -37,8 +38,8 @@ SETUP
  `$ cd database`  
  `$ npm install`  
  `$ DSN=<DSN> node models.js`  
- - replace <DSN> with the DSN you got from the previous step making sure [host] is the IP of the server.
- - check the server database to verify the tables were created
+ - replace `<DSN>` with the DSN you got from the previous step, making sure [host] is the IP of the server
+ - check the server database, from a local DB management application, to verify the tables were created
 
 ## create server (server)
  `$ dokku apps:create my-server`  
@@ -87,7 +88,7 @@ Other
  `$ docker system prune --volumes`  
 
 ## debug, hanging containers still running (server)
- - this happens if you shutdown/restart the server immediately after a code push 
+ - this issue occurs when you shutdown/restart the server immediately after a code push 
  - old dokku docker containers take a few minutes to destroy after new containers are active  
  `$ docker ps`  
  - should contain 2 containers for postgres and the number of instances listed in `node/DOKKU_SCALE`
