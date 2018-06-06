@@ -1,0 +1,10 @@
+.idea
+.DS_Store
+npm-debug.log
+
+database/node_modules
+node/node_modules
+node/config.js
+node/node.tar.gz
+node/test.js
+

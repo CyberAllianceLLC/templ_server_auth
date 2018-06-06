@@ -1,0 +1,32 @@
+version: '3'
+services:
+  db:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: ''
+    ports:
+      - 5432:5432
+
+  node:
+    build: ./node
+    environment:
+      DATABASE_URL: 'postgres://postgres:@db:5432/postgres'
+      NODE_ENV: 'development'
+      DYNO: 'web.1'
+    volumes:
+      - ./node:/app
+      - /app/node_modules
+    depends_on:
+      - db
+    ports:
+      - 3000:3000
+    command: npm run dev
+
+  node_db:
+    build: ./database
+    volumes:
+      - ./database:/app
+      - /app/node_modules
+    depends_on:
+      - db
