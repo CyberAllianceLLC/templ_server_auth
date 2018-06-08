@@ -21,7 +21,9 @@ if(process.env.DYNO === 'web.1'){
       .update({
         login_attempt: 0,
         email_attempt: 0
-      });
+      })
+      .where('login_attempt', '>', 0)
+      .orWhere('email_attempt', '>', 0);
 
     }).then(function(data) {
       //SUCCESS

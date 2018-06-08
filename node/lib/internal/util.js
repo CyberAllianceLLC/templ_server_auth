@@ -14,8 +14,8 @@ util.newRefreshToken = function (query) {
   return q.fcall(function () {
     //FILTER
     j.assert(query, {
-      u_id: j.string().token().min(3).max(20).required(),
-      holder: j.string().token().min(3).max(20).required(),
+      u_id: j.string().required(),
+      holder: j.string().required(),
       name: j.string().max(100).required(),
       scope: j.array().items(j.string().valid(lib.config.TOKENS.user_scope).required()).unique().required()
     });

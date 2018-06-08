@@ -1,5 +1,6 @@
 var q = require('q');
 var j = require('joi');
+var shortid = require('shortid');
 var crypto = require('crypto');
 var nodemailer = require('nodemailer');
 
@@ -11,38 +12,11 @@ var nm = nodemailer.createTransport(lib.config.SMTP);
 var users = {};
 
 
-//DONE: getUsers <[u_id]>
-users.getUsers = function (query) {
-  return q.fcall(function () {
-    //FILTER
-    j.assert(query, {
-      u_id: j.array().items(j.string().token().min(3).max(20).required()).required()
-    });
-
-    return {
-      u_id: query.u_id
-    };
-  }).then(function (data) {
-    //QUERY
-    return knex('users')
-    .select([
-      'u_id',
-      'created_at'
-    ])
-    .whereIn('u_id', data.u_id);
-
-  }).then(function (data) {
-    //AFTER
-    return data;
-  });
-};
-
-//DONE: newUser <username> <email> <password>
+//DONE: newUser <email> <password>
 users.newUser = function (query) {
   return q.fcall(function () {
     //FILTER
     j.assert(query, {
-      username: j.string().token().min(3).max(20).required(),
       email: j.string().email().required(),
       password: j.string().min(6).required()
     });
@@ -57,7 +31,6 @@ users.newUser = function (query) {
     var recovery_key = crypto.randomBytes(64).toString('base64');
 
     return {
-      username: query.username.toLowerCase(),
       email: query.email.toLowerCase(),
       salt: salt,
       password: passwordHash,
@@ -68,7 +41,7 @@ users.newUser = function (query) {
     //create new user
     return knex('users')
     .insert({
-      u_id: data.username,
+      u_id: shortid.generate(),
       email: data.email,
       salt: data.salt,
       password: data.password,
@@ -238,12 +211,12 @@ users.sendRecoveryEmail = function (query) {
   });
 };
 
-//DONE: enterRecoveryKey (ip_address) <u_id> <new_password> <recovery_key>
-users.enterRecoveryKey = function (ip_address, query) {
+//DONE: verifyRecoveryEmail (ip_address) <u_id> <new_password> <recovery_key>
+users.verifyRecoveryEmail = function (ip_address, query) {
   return q.fcall(function () {
     //FILTER
     j.assert(query, {
-      u_id: j.string().token().min(3).max(20).required(),
+      u_id: j.string().required(),
       new_password: j.string().min(6).required(),
       recovery_key: j.string().required()
     });
@@ -258,7 +231,7 @@ users.enterRecoveryKey = function (ip_address, query) {
     var new_recovery_key = crypto.randomBytes(64).toString('base64');
 
     return {
-      u_id: query.u_id.toLowerCase(),
+      u_id: query.u_id,
       recovery_key: query.recovery_key,
       new_salt: new_salt,
       new_password: new_passwordHash,
@@ -298,8 +271,8 @@ users.enterRecoveryKey = function (ip_address, query) {
   });
 };
 
-//DONE: *getUserSettings (u_id)
-users.getUserSettings = function (auth) {
+//DONE: *getUserInfo (u_id)
+users.getUserInfo = function (auth) {
   return q.fcall(function () {
     //FILTER
     return {
@@ -387,13 +360,13 @@ users.verifyNewEmail = function (query) {
   return q.fcall(function () {
     //FILTER
     j.assert(query, {
-      u_id: j.string().token().min(3).max(20).required(),
+      u_id: j.string().required(),
       new_email: j.string().email().required(),
       recovery_key: j.string().required()
     });
 
     return {
-      u_id: query.u_id.toLowerCase(),
+      u_id: query.u_id,
       new_email: query.new_email.toLowerCase(),
       recovery_key: query.recovery_key
     };

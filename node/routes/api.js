@@ -98,22 +98,7 @@ router.post('/removeTokens', mid.auth, function (req, res, next) {
 
 
 //===== USERS =====
-//DONE: getUsers <[u_id]>
-router.post('/getUsers', function (req, res, next) {
-  lib.users.getUsers(req.body).then(function (data) {
-    res.json({
-      success: true,
-      response: data
-    });
-  }).catch(function (error) {
-    res.json({
-      success: false,
-      response: 'request failed'
-    });
-  });
-});
-
-//DONE: newUser <username> <email> <password>
+//DONE: newUser <email> <password>
 router.post('/newUser', function (req, res, next) {
   lib.users.newUser(req.body).then(function (data) {
     res.json({
@@ -130,7 +115,8 @@ router.post('/newUser', function (req, res, next) {
 
 //DONE: loginUser (ip_address) <email> <password>
 router.post('/loginUser', function (req, res, next) {
-  lib.users.loginUser(req.ip, req.body).then(function (data) {
+  var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim();
+  lib.users.loginUser(ip, req.body).then(function (data) {
     res.json({
       success: true,
       response: data
@@ -158,9 +144,10 @@ router.post('/sendRecoveryEmail', function (req, res, next) {
   });
 });
 
-//DONE: enterRecoveryKey (ip_address) <u_id> <new_password> <recovery_key>
-router.post('/enterRecoveryKey', function (req, res, next) {
-  lib.users.enterRecoveryKey(req.ip, req.body).then(function (data) {
+//DONE: verifyRecoveryEmail (ip_address) <u_id> <new_password> <recovery_key>
+router.post('/verifyRecoveryEmail', function (req, res, next) {
+  var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim();
+  lib.users.verifyRecoveryEmail(ip, req.body).then(function (data) {
     res.json({
       success: true,
       response: data
@@ -173,9 +160,9 @@ router.post('/enterRecoveryKey', function (req, res, next) {
   });
 });
 
-//DONE: *getUserSettings (u_id)
-router.post('/getUserSettings', mid.auth, function (req, res, next) {
-  lib.users.getUserSettings(req.auth).then(function (data) {
+//DONE: *getUserInfo (u_id)
+router.post('/getUserInfo', mid.auth, function (req, res, next) {
+  lib.users.getUserInfo(req.auth).then(function (data) {
     res.json({
       success: true,
       response: data
@@ -235,7 +222,8 @@ router.post('/removeUser', mid.auth, function (req, res, next) {
 
 //DONE: *newPassword (ip_address) (u_id) <password> <new_password>
 router.post('/newPassword', mid.auth, function (req, res, next) {
-  lib.users.newPassword(req.ip, req.auth, req.body).then(function (data) {
+  var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim();
+  lib.users.newPassword(ip, req.auth, req.body).then(function (data) {
     res.json({
       success: true,
       response: data

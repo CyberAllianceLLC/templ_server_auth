@@ -12,12 +12,15 @@ exports.config = {
       'newApiToken',
       'getUserTokenInfo',
       'removeTokens',
-      'getUserSettings',
+      'getUserInfo',
       'newEmail',
       'removeUser',
       'newPassword'
     ],
     api_scope: [
+      'getUserSettings'
+    ],
+    vendor_scope: [
       'getUserSettings'
     ]
   },

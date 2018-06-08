@@ -1,7 +1,6 @@
 var q = require('q');
 var j = require('joi');
 var shortid = require('shortid');
-var crypto = require('crypto');
 var jwt = require('jsonwebtoken');
 
 var lib = require('../index.js');
@@ -107,20 +106,20 @@ oauth.newVendorRefreshToken = function (auth, query) {
   return q.fcall(function () {
     //FILTER
     j.assert(query, {
-      holder: j.string().token().min(3).max(20).required(),
+      holder: j.string().required(),
       name: j.string().max(100).required(),
-      scope: j.array().items(j.string().valid(lib.config.TOKENS.api_scope).required()).unique().required()
+      scope: j.array().items(j.string().valid(lib.config.TOKENS.vendor_scope).required()).unique().required()
     });
 
     //verify the person making the token has the rights
     j.assert(auth.u_id, auth.holder);
 
     //verify the vendor is not making a token with user's id
-    j.assert(query.holder.toLowerCase(), j.string().invalid(auth.u_id).required());
+    j.assert(query.holder, j.string().invalid(auth.u_id).required());
 
     return {
       u_id: auth.u_id,
-      holder: query.holder.toLowerCase(),
+      holder: query.holder,
       name: query.name,
       scope: query.scope
     };
