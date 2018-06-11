@@ -65,7 +65,7 @@ users.newUser = function (query) {
           to: email,
           from: '{website name} <noreply@{website name}.com>',
           subject: 'Verify Email - {website name}',
-          text: 'An email verification has been requested for your {website name} account. \n \n To verify your email for {website name}, please visit this link: \n https://{website name}.com/verifyEmail/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using {website name}!'
+          text: 'An email verification has been requested for your {website name} account. \n \n To verify your email for {website name}, please visit this link: \n https://{website name}.com/verifyNewEmail/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using {website name}!'
         };
 
         nm.sendMail(mailOptions, function(error, info) {
@@ -191,7 +191,7 @@ users.sendRecoveryEmail = function (query) {
           to: email,
           from: '{website name} <noreply@{website name}.com>',
           subject: 'Account Recovery - {website name}',
-          text: 'A password reset has been requested for your {website name} account. \n \n If you did not make this request, you can safely ignore this email. A password reset request can be made by anyone, and it does not indicate that your account is in any danger of being accessed by someone else. \n \n If you do actually want to reset your password, visit this link: \n https://{website name}.com/verifyRecover/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) + '\n \n Thank you for using {website name}!'
+          text: 'A password reset has been requested for your {website name} account. \n \n If you did not make this request, you can safely ignore this email. A password reset request can be made by anyone, and it does not indicate that your account is in any danger of being accessed by someone else. \n \n If you do actually want to reset your password, visit this link: \n https://{website name}.com/verifyRecoveryEmail/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) + '\n \n Thank you for using {website name}!'
         };
 
         nm.sendMail(mailOptions, function(error, info) {
@@ -335,7 +335,7 @@ users.newEmail = function (auth, query) {
           to: email,
           from: '{website name} <noreply@{website name}.com>',
           subject: 'Verify Email - {website name}',
-          text: 'An email verification has been requested for your {website name} account. \n \n To verify your email for {website name}, please visit this link: \n https://{website name}.com/verifyEmail/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using {website name}!'
+          text: 'An email verification has been requested for your {website name} account. \n \n To verify your email for {website name}, please visit this link: \n https://{website name}.com/verifyNewEmail/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using {website name}!'
         };
 
         nm.sendMail(mailOptions, function(error, info) {

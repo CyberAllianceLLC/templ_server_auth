@@ -1,7 +1,7 @@
 var config = {
-  JWT: '',
+  JWT: 'secret_key',
   SMTP: {
-    host: 'smtp.example.com',
+    host: 'smtp.gmail.com',
     port: 465,
     secure: true,
     auth: {
