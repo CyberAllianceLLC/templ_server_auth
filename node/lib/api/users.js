@@ -41,21 +41,21 @@ users.newUser = function (query) {
     //create new user
     return knex('users')
     .insert({
-      u_id: shortid.generate(),
+      user_id: shortid.generate(),
       email: data.email,
       salt: data.salt,
       password: data.password,
       recovery_key: data.recovery_key
     })
     .returning([
-      'u_id',
+      'user_id',
       'email',
       'recovery_key'
     ]).then(function (user) {
       //send verification email
       j.assert(user, j.array().min(1).required());
 
-      var u_id = user[0].u_id;
+      var user_id = user[0].user_id;
       var email = user[0].email;
       var recovery_key = user[0].recovery_key;
 
@@ -65,7 +65,7 @@ users.newUser = function (query) {
           to: email,
           from: '{website name} <noreply@{website name}.com>',
           subject: 'Verify Email - {website name}',
-          text: 'An email verification has been requested for your {website name} account. \n \n To verify your email for {website name}, please visit this link: \n https://{website name}.com/verifyNewEmail/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using {website name}!'
+          text: 'An email verification has been requested for your {website name} account. \n \n To verify your email for {website name}, please visit this link: \n https://{website name}.com/verifyNewEmail/'+ encodeURIComponent(user_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using {website name}!'
         };
 
         nm.sendMail(mailOptions, function(error, info) {
@@ -103,7 +103,7 @@ users.loginUser = function (ip_address, query) {
     //get password and salt of user
     return knex('users')
     .select([
-      'u_id',
+      'user_id',
       'salt',
       'password'
     ])
@@ -121,7 +121,7 @@ users.loginUser = function (ip_address, query) {
       if(user[0].password === passwordHash){
         //passwords match
         return [{
-          u_id: user[0].u_id
+          user_id: user[0].user_id
         }];
 
       }else{
@@ -130,7 +130,7 @@ users.loginUser = function (ip_address, query) {
         .update({
           login_attempt: knex.raw('login_attempt + 1')
         })
-        .where('u_id', '=', user[0].u_id)
+        .where('user_id', '=', user[0].user_id)
         .then(function () {
           throw new Error('login failed');
         });
@@ -144,8 +144,8 @@ users.loginUser = function (ip_address, query) {
 
     //create new refresh token
     return lib.util.newRefreshToken({
-      u_id: data[0].u_id,
-      holder: data[0].u_id,
+      user_id: data[0].user_id,
+      holder: data[0].user_id,
       name: ip_address,
       scope: lib.config.TOKENS.user_scope
     });
@@ -174,14 +174,14 @@ users.sendRecoveryEmail = function (query) {
     .where('email', '=', data.email)
     .where('email_attempt', '<=', 6)
     .returning([
-      'u_id',
+      'user_id',
       'email',
       'recovery_key'
     ])
     .then(function (user) {
       j.assert(user, j.array().min(1).required());
 
-      var u_id = user[0].u_id;
+      var user_id = user[0].user_id;
       var email = user[0].email;
       var recovery_key = user[0].recovery_key;
 
@@ -191,7 +191,7 @@ users.sendRecoveryEmail = function (query) {
           to: email,
           from: '{website name} <noreply@{website name}.com>',
           subject: 'Account Recovery - {website name}',
-          text: 'A password reset has been requested for your {website name} account. \n \n If you did not make this request, you can safely ignore this email. A password reset request can be made by anyone, and it does not indicate that your account is in any danger of being accessed by someone else. \n \n If you do actually want to reset your password, visit this link: \n https://{website name}.com/verifyRecoveryEmail/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) + '\n \n Thank you for using {website name}!'
+          text: 'A password reset has been requested for your {website name} account. \n \n If you did not make this request, you can safely ignore this email. A password reset request can be made by anyone, and it does not indicate that your account is in any danger of being accessed by someone else. \n \n If you do actually want to reset your password, visit this link: \n https://{website name}.com/verifyRecoveryEmail/'+ encodeURIComponent(user_id) +'/'+ encodeURIComponent(recovery_key) + '\n \n Thank you for using {website name}!'
         };
 
         nm.sendMail(mailOptions, function(error, info) {
@@ -211,12 +211,12 @@ users.sendRecoveryEmail = function (query) {
   });
 };
 
-//DONE: verifyRecoveryEmail (ip_address) <u_id> <new_password> <recovery_key>
+//DONE: verifyRecoveryEmail (ip_address) <user_id> <new_password> <recovery_key>
 users.verifyRecoveryEmail = function (ip_address, query) {
   return q.fcall(function () {
     //FILTER
     j.assert(query, {
-      u_id: j.string().required(),
+      user_id: j.string().required(),
       new_password: j.string().min(6).required(),
       recovery_key: j.string().required()
     });
@@ -231,7 +231,7 @@ users.verifyRecoveryEmail = function (ip_address, query) {
     var new_recovery_key = crypto.randomBytes(64).toString('base64');
 
     return {
-      u_id: query.u_id,
+      user_id: query.user_id,
       recovery_key: query.recovery_key,
       new_salt: new_salt,
       new_password: new_passwordHash,
@@ -247,10 +247,10 @@ users.verifyRecoveryEmail = function (ip_address, query) {
       recovery_key: data.new_recovery_key,
       updated_at: knex.raw('now()')
     })
-    .where('u_id', '=', data.u_id)
+    .where('user_id', '=', data.user_id)
     .where('recovery_key', '=', data.recovery_key)
     .returning([
-      'u_id'
+      'user_id'
     ]);
 
   }).then(function (user) {
@@ -258,11 +258,11 @@ users.verifyRecoveryEmail = function (ip_address, query) {
     j.assert(user, j.array().min(1).required());
 
     //delete old session tokens
-    return lib.util.removeAllSessions({u_id: user[0].u_id}).then(function () {
+    return lib.util.removeAllSessions({user_id: user[0].user_id}).then(function () {
       //create new refresh token
       return lib.util.newRefreshToken({
-        u_id: user[0].u_id,
-        holder: user[0].u_id,
+        user_id: user[0].user_id,
+        holder: user[0].user_id,
         name: ip_address,
         scope: lib.config.TOKENS.user_scope
       });
@@ -271,23 +271,23 @@ users.verifyRecoveryEmail = function (ip_address, query) {
   });
 };
 
-//DONE: *getUserInfo (u_id)
+//DONE: *getUserInfo (user_id)
 users.getUserInfo = function (auth) {
   return q.fcall(function () {
     //FILTER
     return {
-      u_id: auth.u_id
+      user_id: auth.user_id
     };
   }).then(function (data) {
     //QUERY
     return knex('users')
     .select([
-      'u_id',
+      'user_id',
       'email',
       'updated_at',
       'created_at'
     ])
-    .where('u_id', '=', data.u_id);
+    .where('user_id', '=', data.user_id);
 
   }).then(function (data) {
     //AFTER
@@ -296,7 +296,7 @@ users.getUserInfo = function (auth) {
   });
 };
 
-//DONE: *newEmail (u_id) <email>
+//DONE: *newEmail (user_id) <email>
 users.newEmail = function (auth, query) {
   return q.fcall(function () {
     //FILTER
@@ -305,7 +305,7 @@ users.newEmail = function (auth, query) {
     });
 
     return {
-      u_id: auth.u_id,
+      user_id: auth.user_id,
       email: query.email.toLowerCase()
     };
   }).then(function (data) {
@@ -315,17 +315,17 @@ users.newEmail = function (auth, query) {
     .update({
       email_attempt: knex.raw('email_attempt + 1')
     })
-    .where('u_id', '=', data.u_id)
+    .where('user_id', '=', data.user_id)
     .where('email_attempt', '<=', 6)
     .returning([
-      'u_id',
+      'user_id',
       'recovery_key'
     ])
     .then(function (user) {
       //send email
       j.assert(user, j.array().min(1).required());
 
-      var u_id = user[0].u_id;
+      var user_id = user[0].user_id;
       var email = data.email;
       var recovery_key = user[0].recovery_key;
 
@@ -335,7 +335,7 @@ users.newEmail = function (auth, query) {
           to: email,
           from: '{website name} <noreply@{website name}.com>',
           subject: 'Verify Email - {website name}',
-          text: 'An email verification has been requested for your {website name} account. \n \n To verify your email for {website name}, please visit this link: \n https://{website name}.com/verifyNewEmail/'+ encodeURIComponent(u_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using {website name}!'
+          text: 'An email verification has been requested for your {website name} account. \n \n To verify your email for {website name}, please visit this link: \n https://{website name}.com/verifyNewEmail/'+ encodeURIComponent(user_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using {website name}!'
         };
 
         nm.sendMail(mailOptions, function(error, info) {
@@ -355,18 +355,18 @@ users.newEmail = function (auth, query) {
   });
 };
 
-//DONE: verifyNewEmail <u_id> <new_email> <recovery_key>
+//DONE: verifyNewEmail <user_id> <new_email> <recovery_key>
 users.verifyNewEmail = function (query) {
   return q.fcall(function () {
     //FILTER
     j.assert(query, {
-      u_id: j.string().required(),
+      user_id: j.string().required(),
       new_email: j.string().email().required(),
       recovery_key: j.string().required()
     });
 
     return {
-      u_id: query.u_id,
+      user_id: query.user_id,
       new_email: query.new_email.toLowerCase(),
       recovery_key: query.recovery_key
     };
@@ -379,9 +379,9 @@ users.verifyNewEmail = function (query) {
       recovery_key: crypto.randomBytes(64).toString('base64'),
       updated_at: knex.raw('now()')
     })
-    .where('u_id', '=', data.u_id)
+    .where('user_id', '=', data.user_id)
     .where('recovery_key', '=', data.recovery_key)
-    .returning(['u_id']);
+    .returning(['user_id']);
 
   }).then(function (data) {
     //AFTER
@@ -390,7 +390,7 @@ users.verifyNewEmail = function (query) {
   });
 };
 
-//DONE: *removeUser (u_id) <password>
+//DONE: *removeUser (user_id) <password>
 users.removeUser = function (auth, query) {
   return q.fcall(function () {
     //FILTER
@@ -399,7 +399,7 @@ users.removeUser = function (auth, query) {
     });
 
     return {
-      u_id: auth.u_id,
+      user_id: auth.user_id,
       password: query.password
     };
   }).then(function (data) {
@@ -408,7 +408,7 @@ users.removeUser = function (auth, query) {
     .select([
       'salt'
     ])
-    .where('u_id', '=', data.u_id)
+    .where('user_id', '=', data.user_id)
     .then(function (user) {
       //not empty
       j.assert(user, j.array().min(1).required());
@@ -419,9 +419,9 @@ users.removeUser = function (auth, query) {
       //delete user
       return knex('users')
       .del()
-      .where('u_id', '=', data.u_id)
+      .where('user_id', '=', data.user_id)
       .where('password', '=', passwordHash)
-      .returning(['u_id'])
+      .returning(['user_id'])
     });
 
   }).then(function (data) {
@@ -431,7 +431,7 @@ users.removeUser = function (auth, query) {
   });
 };
 
-//DONE: *newPassword (ip_address) (u_id) <password> <new_password>
+//DONE: *newPassword (ip_address) (user_id) <password> <new_password>
 users.newPassword = function (ip_address, auth, query) {
   return q.fcall(function () {
     //FILTER
@@ -450,7 +450,7 @@ users.newPassword = function (ip_address, auth, query) {
     var new_recovery_key = crypto.randomBytes(64).toString('base64');
 
     return {
-      u_id: auth.u_id,
+      user_id: auth.user_id,
       password: query.password,
       new_salt: new_salt,
       new_password: new_passwordHash,
@@ -462,7 +462,7 @@ users.newPassword = function (ip_address, auth, query) {
     .select([
       'salt'
     ])
-    .where('u_id', '=', data.u_id)
+    .where('user_id', '=', data.user_id)
     .then(function (user) {
       //not empty
       j.assert(user, j.array().min(1).required());
@@ -478,10 +478,10 @@ users.newPassword = function (ip_address, auth, query) {
         recovery_key: data.new_recovery_key,
         updated_at: knex.raw('now()')
       })
-      .where('u_id', '=', data.u_id)
+      .where('user_id', '=', data.user_id)
       .where('password', '=', passwordHash)
       .returning([
-        'u_id'
+        'user_id'
       ]);
     });
 
@@ -490,11 +490,11 @@ users.newPassword = function (ip_address, auth, query) {
     j.assert(data, j.array().min(1).required());
 
     //delete old session tokens
-    return lib.util.removeAllSessions({u_id: data[0].u_id}).then(function () {
+    return lib.util.removeAllSessions({user_id: data[0].user_id}).then(function () {
       //create and return new refresh token
       return lib.util.newRefreshToken({
-        u_id: data[0].u_id,
-        holder: data[0].u_id,
+        user_id: data[0].user_id,
+        holder: data[0].user_id,
         name: ip_address,
         scope: lib.config.TOKENS.user_scope
       });

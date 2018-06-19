@@ -9,19 +9,19 @@ var knex = lib.config.DB;
 var util = {};
 
 
-//DONE: newRefreshToken <u_id> <holder> <name> <[scope]>
+//DONE: newRefreshToken <user_id> <holder> <name> <[scope]>
 util.newRefreshToken = function (query) {
   return q.fcall(function () {
     //FILTER
     j.assert(query, {
-      u_id: j.string().required(),
+      user_id: j.string().required(),
       holder: j.string().required(),
       name: j.string().max(100).required(),
       scope: j.array().items(j.string().valid(lib.config.TOKENS.user_scope).required()).unique().required()
     });
 
     return {
-      u_id: query.u_id,
+      user_id: query.user_id,
       holder: query.holder,
       name: query.name,
       scope: query.scope
@@ -30,8 +30,8 @@ util.newRefreshToken = function (query) {
     //QUERY
     return knex('tokens')
     .insert({
-      t_id: shortid.generate(),
-      u_id: data.u_id,
+      token_id: shortid.generate(),
+      user_id: data.user_id,
       holder: data.holder,
       type: 'refresh',
       name: data.name,
@@ -39,8 +39,8 @@ util.newRefreshToken = function (query) {
       expires: knex.raw("now() + (make_interval(secs => 1) * ?) ", [lib.config.TOKENS.refreshTokenExpire])
     })
     .returning([
-      't_id',
-      'u_id',
+      'token_id',
+      'user_id',
       'holder',
       'name',
       'scope'
@@ -52,8 +52,8 @@ util.newRefreshToken = function (query) {
 
     //create refresh token
     var refreshToken = jwt.sign({
-      t_id: data[0].t_id,
-      u_id: data[0].u_id,
+      token_id: data[0].token_id,
+      user_id: data[0].user_id,
       holder: data[0].holder,
       type: 'refresh',
       name: data[0].name,
@@ -64,8 +64,8 @@ util.newRefreshToken = function (query) {
 
     //create auth token
     var authToken = jwt.sign({
-      t_id: data[0].t_id,
-      u_id: data[0].u_id,
+      token_id: data[0].token_id,
+      user_id: data[0].user_id,
       holder: data[0].holder,
       type: 'auth',
       name: data[0].name,
@@ -81,19 +81,19 @@ util.newRefreshToken = function (query) {
   });
 };
 
-//DONE: removeAllSessions <u_id>
+//DONE: removeAllSessions <user_id>
 util.removeAllSessions = function (query) {
   return q.fcall(function () {
     //FILTER
     return {
-      u_id: query.u_id
+      user_id: query.user_id
     };
   }).then(function (data) {
     //QUERY
     return knex('tokens')
     .del()
-    .where('u_id', '=', data.u_id)
-    .where('holder', '=', data.u_id)
+    .where('user_id', '=', data.user_id)
+    .where('holder', '=', data.user_id)
     .where('type', '=', 'refresh')
 
   }).then(function (data) {

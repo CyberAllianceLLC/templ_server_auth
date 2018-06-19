@@ -13,7 +13,7 @@ q.fcall(function() {
 }).then(function (data) {
   //DONE: users
   return knex.schema.createTable('users', function(table) {
-    table.string('u_id', 15).notNullable().primary().unique();
+    table.string('user_id', 15).notNullable().primary().unique();
     table.string('email', 50).notNullable().unique().index();
     table.boolean('verified').notNullable().defaultTo(false);
     table.string('salt', 100).notNullable();
@@ -27,9 +27,9 @@ q.fcall(function() {
 }).then(function (data) {
   //DONE: tokens
   return knex.schema.createTable('tokens', function(table) {
-    table.string('t_id', 15).notNullable().primary().unique();
-    table.string('u_id', 15).notNullable().references('users.u_id').onDelete('CASCADE').index();
-    table.string('holder', 15).notNullable().references('users.u_id').onDelete('CASCADE').index();
+    table.string('token_id', 15).notNullable().primary().unique();
+    table.string('user_id', 15).notNullable().references('users.user_id').onDelete('CASCADE').index();
+    table.string('holder', 15).notNullable().references('users.user_id').onDelete('CASCADE').index();
     table.enu('type', ['refresh', 'api']).notNullable();
     table.string('name', 100).notNullable();
     table.specificType('scope', 'varchar(50)[]').notNullable().defaultTo('{}');

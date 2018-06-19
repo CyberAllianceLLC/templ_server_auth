@@ -24,17 +24,17 @@ oauth.newAuthToken = function (query) {
     j.assert(decoded.type, 'refresh');
 
     return {
-      t_id: decoded.t_id
+      token_id: decoded.token_id
     };
   }).then(function (data) {
     //QUERY
     //delete refresh token
     return knex('tokens')
     .del()
-    .where('t_id', '=', data.t_id)
+    .where('token_id', '=', data.token_id)
     .where('type', '=', 'refresh')
     .returning([
-      'u_id',
+      'user_id',
       'holder',
       'name',
       'scope'
@@ -46,7 +46,7 @@ oauth.newAuthToken = function (query) {
 
     //create new refresh token
     return lib.util.newRefreshToken({
-      u_id: data[0].u_id,
+      user_id: data[0].user_id,
       holder: data[0].holder,
       name: data[0].name,
       scope: data[0].scope
@@ -70,20 +70,20 @@ oauth.newApiRefreshToken = function (query) {
     j.assert(decoded.type, 'api');
 
     return {
-      t_id: decoded.t_id
+      token_id: decoded.token_id
     };
   }).then(function (data) {
     //QUERY
     //verify api token
     return knex('tokens')
     .select([
-      'u_id',
+      'user_id',
       'holder',
       'name',
       'scope'
     ])
-    .where('t_id', '=', data.t_id)
-    .whereRaw('u_id = holder')
+    .where('token_id', '=', data.token_id)
+    .whereRaw('user_id = holder')
     .where('type', '=', 'api');
 
   }).then(function (data) {
@@ -92,7 +92,7 @@ oauth.newApiRefreshToken = function (query) {
 
     //create new refresh token
     return lib.util.newRefreshToken({
-      u_id: data[0].u_id,
+      user_id: data[0].user_id,
       holder: data[0].holder,
       name: data[0].name,
       scope: data[0].scope
@@ -101,7 +101,7 @@ oauth.newApiRefreshToken = function (query) {
   });
 };
 
-//DONE: *newVendorRefreshToken (u_id, holder) <holder> <name> <[scope]>
+//DONE: *newVendorRefreshToken (user_id, holder) <holder> <name> <[scope]>
 oauth.newVendorRefreshToken = function (auth, query) {
   return q.fcall(function () {
     //FILTER
@@ -112,13 +112,13 @@ oauth.newVendorRefreshToken = function (auth, query) {
     });
 
     //verify the person making the token has the rights
-    j.assert(auth.u_id, auth.holder);
+    j.assert(auth.user_id, auth.holder);
 
     //verify the vendor is not making a token with user's id
-    j.assert(query.holder, j.string().invalid(auth.u_id).required());
+    j.assert(query.holder, j.string().invalid(auth.user_id).required());
 
     return {
-      u_id: auth.u_id,
+      user_id: auth.user_id,
       holder: query.holder,
       name: query.name,
       scope: query.scope
@@ -127,7 +127,7 @@ oauth.newVendorRefreshToken = function (auth, query) {
     //AFTER
     //create new refresh token
     return lib.util.newRefreshToken({
-      u_id: data.u_id,
+      user_id: data.user_id,
       holder: data.holder,
       name: data.name,
       scope: data.scope
@@ -136,7 +136,7 @@ oauth.newVendorRefreshToken = function (auth, query) {
   });
 };
 
-//DONE: *newApiToken (u_id, holder) <name> <[scope]>
+//DONE: *newApiToken (user_id, holder) <name> <[scope]>
 oauth.newApiToken = function (auth, query) {
   return q.fcall(function () {
     //FILTER
@@ -146,11 +146,11 @@ oauth.newApiToken = function (auth, query) {
     });
 
     //verify the person making the api key has the rights
-    j.assert(auth.u_id, auth.holder);
+    j.assert(auth.user_id, auth.holder);
 
     return {
-      u_id: auth.u_id,
-      holder: auth.u_id,
+      user_id: auth.user_id,
+      holder: auth.user_id,
       name: query.name,
       scope: query.scope
     };
@@ -158,8 +158,8 @@ oauth.newApiToken = function (auth, query) {
     //QUERY
     return knex('tokens')
     .insert({
-      t_id: shortid.generate(),
-      u_id: data.u_id,
+      token_id: shortid.generate(),
+      user_id: data.user_id,
       holder: data.holder,
       type: 'api',
       name: data.name,
@@ -167,8 +167,8 @@ oauth.newApiToken = function (auth, query) {
       expires: knex.raw("now() + (make_interval(secs => 1) * ?) ", [lib.config.TOKENS.apiTokenExpire])
     })
     .returning([
-      't_id',
-      'u_id',
+      'token_id',
+      'user_id',
       'holder',
       'name',
       'scope'
@@ -180,8 +180,8 @@ oauth.newApiToken = function (auth, query) {
 
     //create api token
     var apiToken = jwt.sign({
-      t_id: data[0].t_id,
-      u_id: data[0].u_id,
+      token_id: data[0].token_id,
+      user_id: data[0].user_id,
       holder: data[0].holder,
       type: 'api',
       name: data[0].name,
@@ -196,19 +196,19 @@ oauth.newApiToken = function (auth, query) {
   });
 };
 
-//DONE: *getUserTokenInfo (u_id)
+//DONE: *getUserTokenInfo (user_id)
 oauth.getUserTokenInfo = function (auth) {
   return q.fcall(function () {
     //FILTER
     return {
-      u_id: auth.u_id
+      user_id: auth.user_id
     };
   }).then(function (data) {
     //QUERY
     return knex('tokens')
     .select([
-      't_id',
-      'u_id',
+      'token_id',
+      'user_id',
       'holder',
       'type',
       'name',
@@ -216,7 +216,7 @@ oauth.getUserTokenInfo = function (auth) {
       'expires',
       'created_at'
     ])
-    .where('u_id', '=', data.u_id)
+    .where('user_id', '=', data.user_id)
     .orderBy('created_at', 'DESC');
 
   }).then(function (data) {
@@ -225,25 +225,25 @@ oauth.getUserTokenInfo = function (auth) {
   });
 };
 
-//DONE: *removeTokens (u_id) <[t_id]>
+//DONE: *removeTokens (user_id) <[token_id]>
 oauth.removeTokens = function (auth, query) {
   return q.fcall(function () {
     //FILTER
     j.assert(query, {
-      t_id: j.array().items(j.string().required()).required()
+      token_id: j.array().items(j.string().required()).required()
     });
 
     return {
-      u_id: auth.u_id,
-      t_id: query.t_id
+      user_id: auth.user_id,
+      token_id: query.token_id
     };
   }).then(function (data) {
     //QUERY
     return knex('tokens')
     .del()
-    .whereIn('t_id', data.t_id)
+    .whereIn('token_id', data.token_id)
     .where(function(p1) {
-      p1.where('u_id', '=', data.u_id).orWhere('holder', '=', data.u_id)
+      p1.where('user_id', '=', data.user_id).orWhere('holder', '=', data.user_id)
     });
 
   }).then(function (data) {
