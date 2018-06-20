@@ -390,8 +390,8 @@ users.verifyNewEmail = function (query) {
   });
 };
 
-//DONE: *removeUser (user_id) <password>
-users.removeUser = function (auth, query) {
+//DONE: *deleteUser (user_id) <password>
+users.deleteUser = function (auth, query) {
   return q.fcall(function () {
     //FILTER
     j.assert(query, {

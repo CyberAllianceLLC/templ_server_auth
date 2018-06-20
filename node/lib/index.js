@@ -14,7 +14,7 @@ exports.config = {
       'removeTokens',
       'getUserInfo',
       'newEmail',
-      'removeUser',
+      'deleteUser',
       'newPassword'
     ],
     api_scope: [
