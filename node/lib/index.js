@@ -11,7 +11,7 @@ exports.config = {
       'newVendorRefreshToken',
       'newApiToken',
       'getUserTokenInfo',
-      'removeTokens',
+      'deleteTokens',
       'getUserInfo',
       'newEmail',
       'deleteUser',

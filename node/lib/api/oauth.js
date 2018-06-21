@@ -55,8 +55,8 @@ oauth.newAuthToken = function (query) {
   });
 };
 
-//DONE: newApiRefreshToken <apiToken>
-oauth.newApiRefreshToken = function (query) {
+//DONE: newApiAuthToken <apiToken>
+oauth.newApiAuthToken = function (query) {
   return q.fcall(function () {
     //FILTER
     j.assert(query, {
@@ -77,6 +77,7 @@ oauth.newApiRefreshToken = function (query) {
     //verify api token
     return knex('tokens')
     .select([
+      'token_id',
       'user_id',
       'holder',
       'name',
@@ -90,12 +91,16 @@ oauth.newApiRefreshToken = function (query) {
     //AFTER
     j.assert(data, j.array().min(1).required());
 
-    //create new refresh token
-    return lib.util.newRefreshToken({
+    //create new auth token
+    return jwt.sign({
+      token_id: data[0].token_id,
       user_id: data[0].user_id,
       holder: data[0].holder,
+      type: 'auth',
       name: data[0].name,
       scope: data[0].scope
+    }, lib.config.JWT, {
+      expiresIn: lib.config.TOKENS.authTokenExpire
     });
 
   });
@@ -225,8 +230,8 @@ oauth.getUserTokenInfo = function (auth) {
   });
 };
 
-//DONE: *removeTokens (user_id) <[token_id]>
-oauth.removeTokens = function (auth, query) {
+//DONE: *deleteTokens (user_id) <[token_id]>
+oauth.deleteTokens = function (auth, query) {
   return q.fcall(function () {
     //FILTER
     j.assert(query, {
@@ -248,7 +253,7 @@ oauth.removeTokens = function (auth, query) {
 
   }).then(function (data) {
     //AFTER
-    return 'tokens removed';
+    return 'tokens deleted';
   });
 };
 

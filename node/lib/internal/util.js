@@ -81,8 +81,8 @@ util.newRefreshToken = function (query) {
   });
 };
 
-//DONE: removeAllSessions <user_id>
-util.removeAllSessions = function (query) {
+//DONE: deleteAllSessions <user_id>
+util.deleteAllSessions = function (query) {
   return q.fcall(function () {
     //FILTER
     return {
@@ -98,7 +98,7 @@ util.removeAllSessions = function (query) {
 
   }).then(function (data) {
     //AFTER
-    return 'sessions removed';
+    return 'sessions deleted';
   });
 };
 

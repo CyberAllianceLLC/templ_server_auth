@@ -21,9 +21,9 @@ router.post('/newAuthToken', function (req, res, next) {
   });
 });
 
-//DONE: newApiRefreshToken <apiToken>
-router.post('/newApiRefreshToken', function (req, res, next) {
-  lib.oauth.newApiRefreshToken(req.body).then(function (data) {
+//DONE: newApiAuthToken <apiToken>
+router.post('/newApiAuthToken', function (req, res, next) {
+  lib.oauth.newApiAuthToken(req.body).then(function (data) {
     res.json({
       success: true,
       response: data
@@ -81,9 +81,9 @@ router.post('/getUserTokenInfo', mid.auth, function (req, res, next) {
   });
 });
 
-//DONE: *removeTokens (user_id) <[token_id]>
-router.post('/removeTokens', mid.auth, function (req, res, next) {
-  lib.oauth.removeTokens(req.auth, req.body).then(function (data) {
+//DONE: *deleteTokens (user_id) <[token_id]>
+router.post('/deleteTokens', mid.auth, function (req, res, next) {
+  lib.oauth.deleteTokens(req.auth, req.body).then(function (data) {
     res.json({
       success: true,
       response: data

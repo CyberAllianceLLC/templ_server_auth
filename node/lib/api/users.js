@@ -258,7 +258,7 @@ users.verifyRecoveryEmail = function (ip_address, query) {
     j.assert(user, j.array().min(1).required());
 
     //delete old session tokens
-    return lib.util.removeAllSessions({user_id: user[0].user_id}).then(function () {
+    return lib.util.deleteAllSessions({user_id: user[0].user_id}).then(function () {
       //create new refresh token
       return lib.util.newRefreshToken({
         user_id: user[0].user_id,
@@ -427,7 +427,7 @@ users.deleteUser = function (auth, query) {
   }).then(function (data) {
     //AFTER
     j.assert(data, j.array().min(1).required());
-    return 'user removed';
+    return 'user deleted';
   });
 };
 
@@ -490,7 +490,7 @@ users.newPassword = function (ip_address, auth, query) {
     j.assert(data, j.array().min(1).required());
 
     //delete old session tokens
-    return lib.util.removeAllSessions({user_id: data[0].user_id}).then(function () {
+    return lib.util.deleteAllSessions({user_id: data[0].user_id}).then(function () {
       //create and return new refresh token
       return lib.util.newRefreshToken({
         user_id: data[0].user_id,
