@@ -386,7 +386,10 @@ users.verifyNewEmail = function (query) {
   }).then(function (data) {
     //AFTER
     j.assert(data, j.array().min(1).required());
-    return 'email updated';
+    //delete old session tokens
+    return lib.util.deleteAllSessions({user_id: data[0].user_id}).then(function () {
+      return 'email updated';
+    });
   });
 };
 
