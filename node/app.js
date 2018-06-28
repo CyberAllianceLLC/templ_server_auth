@@ -9,6 +9,13 @@ var api = require('./routes/api');
 
 var app = express();
 
+//remove X-Powered-By headers and disable iframes
+app.disable('x-powered-by');
+app.use(function(req, res, next) {
+  res.setHeader('X-Frame-Options', 'DENY');
+  next();
+});
+
 //uncomment next line after placing your favicon in /public
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));

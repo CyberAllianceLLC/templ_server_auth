@@ -8,7 +8,8 @@ exports.config = {
     refreshTokenExpire: 60 * 60 * 24 * 365, //1 year
     apiTokenExpire: 60 * 60 * 24 * 365 * 1000, //1000 years
     user_scope: [
-      'newVendorRefreshToken',
+      'newVendorAccessToken',
+      'newVendorAuthToken',
       'newApiToken',
       'getUserTokenInfo',
       'deleteTokens',
@@ -18,10 +19,14 @@ exports.config = {
       'newPassword'
     ],
     api_scope: [
-      'getUserSettings'
+      'newVendorAccessToken',
+      'newVendorAuthToken',
+      'getUserTokenInfo',
+      'deleteTokens',
+      'getUserInfo'
     ],
     vendor_scope: [
-      'getUserSettings'
+      'getUserInfo'
     ]
   },
   DB: require('knex')({

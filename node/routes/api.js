@@ -36,9 +36,24 @@ router.post('/newApiAuthToken', function (req, res, next) {
   });
 });
 
-//DONE: *newVendorRefreshToken (user_id, holder) <holder> <name> <[scope]>
-router.post('/newVendorRefreshToken', mid.auth, function (req, res, next) {
-  lib.oauth.newVendorRefreshToken(req.auth, req.body).then(function (data) {
+//DONE: *newVendorAccessToken (user_id, holder) <holder> <redirect_uri> <[scope]>
+router.post('/newVendorAccessToken', mid.auth, function (req, res, next) {
+  lib.oauth.newVendorAccessToken(req.auth, req.body).then(function (data) {
+    res.json({
+      success: true,
+      response: data
+    });
+  }).catch(function (error) {
+    res.json({
+      success: false,
+      response: 'request failed'
+    });
+  });
+});
+
+//DONE: *newVendorAuthToken (user_id, holder) <accessToken> <redirect_uri> <[scope]>
+router.post('/newVendorAuthToken', mid.auth, function (req, res, next) {
+  lib.oauth.newVendorAuthToken(req.auth, req.body).then(function (data) {
     res.json({
       success: true,
       response: data
