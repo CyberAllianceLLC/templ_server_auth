@@ -57,7 +57,7 @@ oauth.newAuthToken = function (query) {
   });
 };
 
-//CHECK: newApiAuthToken <apiToken>
+//DONE: newApiAuthToken <apiToken>
 oauth.newApiAuthToken = function (query) {
   return q.fcall(function () {
     //FILTER
@@ -111,7 +111,7 @@ oauth.newApiAuthToken = function (query) {
   });
 };
 
-//CHECK: *newVendorAccessToken (user_id, holder) <holder> <redirect_uri> <[scope]>
+//DONE: *newVendorAccessToken (user_id, holder) <holder> <redirect_uri> <[scope]>
 oauth.newVendorAccessToken = function (auth, query) {
   return q.fcall(function () {
     //FILTER
@@ -164,7 +164,7 @@ oauth.newVendorAccessToken = function (auth, query) {
   });
 };
 
-//CHECK: *newVendorAuthToken (user_id, holder) <accessToken> <redirect_uri> <[scope]>
+//DONE: *newVendorAuthToken (user_id, holder) <accessToken> <redirect_uri> <[scope]>
 oauth.newVendorAuthToken = function (auth, query) {
   return q.fcall(function () {
     //FILTER
@@ -314,7 +314,7 @@ oauth.newApiToken = function (auth, query) {
   });
 };
 
-//CHECK: *getUserTokenInfo (user_id)
+//DONE: *getUserTokenInfo (user_id)
 oauth.getUserTokenInfo = function (auth) {
   return q.fcall(function () {
     //FILTER
