@@ -42,7 +42,7 @@ SETUP
  - replace `<DSN>` with the DSN you got from the previous step, making sure [host] is the IP of the server
  - check the server database, from a local DB management application, to verify the tables were created
 
-## create container (server)
+## create server (server)
  `$ dokku apps:create my-server`  
   
 ## link server to database (server)
