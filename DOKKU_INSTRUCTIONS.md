@@ -37,13 +37,14 @@ SETUP
 ## setup DB tables (client)
  `$ cd database`  
  `$ npm install`  
- `$ DSN=<DSN> node models.js`  
+ `$ DSN=<DSN> node models.js` (Linux)  
+ `$ set DSN=<DSN>&& node models.js` (Windows)  
  - replace `<DSN>` with the DSN you got from the previous step, making sure [host] is the IP of the server
  - check the server database, from a local DB management application, to verify the tables were created
 
-## create server (server)
+## create container (server)
  `$ dokku apps:create my-server`  
-
+  
 ## link server to database (server)
  `$ dokku postgres:link my-database my-server`  
  - db credentials (DSN link) is available to the server through the environment variable DATABASE_URL that dokku provides
@@ -51,13 +52,17 @@ SETUP
 ## deploy server code (client)
  - zip the node folder  
  `$ tar -C ./node -czvf node.tar.gz .`  
- - push the code to the server  
+ - push the code to the server (linux)  
  `$ cat node.tar.gz | ssh root@<IP address> "dokku tar:in my-server"`  
- 
+ - push the code to the server (windows)  
+ `$ type node.tar.gz | ssh root@<IP address> "dokku tar:in my-server"`  
+  
 ## setup domain (server)
  `$ dokku domains:add my-server <website>.com`  
- - point domain DNS "A" record to website IP address
-
+ - point domain DNS "A" record to website IP address  
+ `$ dokku domains:report my-server`  
+ - show all websites associated with my-server.  
+   
 ## proxy port change for http domain (server)
  - you can view the current proxy ports by running  
  `$ dokku proxy:ports my-server`  
