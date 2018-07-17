@@ -1,6 +1,8 @@
 # Template Server Authenticated
 
-This is a template node server with OAuth authentication using Dokku.
+This is a template node server with OAuth authentication using Dokku.  
+  
+Client side code can be found here: [templ_vue_auth](https://github.com/CyberAllianceLLC/templ_vue_auth)
   
 ## Local Setup
 * Duplicate and rename `node/example.config.js` to `node/config.js` with the appropriate credentials.

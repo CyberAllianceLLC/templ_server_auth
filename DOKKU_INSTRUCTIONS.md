@@ -21,9 +21,7 @@ SETUP
  `$ wget https://raw.githubusercontent.com/dokku/dokku/<version>/bootstrap.sh`  
  `$ sudo DOKKU_TAG=<version> bash bootstrap.sh`  
  - goto `http://<IP address>`
- - fill out required fields
- - on the dokku landing page, replace the IP address with your website name
- - follow on-screen instructions
+ - click finish  
 
 ## setup postgres (server)
  `$ dokku plugin:install https://github.com/dokku/dokku-postgres.git`  
@@ -58,8 +56,8 @@ SETUP
  `$ type node.tar.gz | ssh root@<IP address> "dokku tar:in my-server"`  
   
 ## setup domain (server)
- `$ dokku domains:add my-server <website>.com`  
- - point domain DNS "A" record to website IP address  
+ `$ dokku domains:add my-server <website>.com www.<website>.com`  
+ - point domain DNS "A" records to website IP address  
  `$ dokku domains:report my-server`  
  - show all websites associated with my-server.  
    

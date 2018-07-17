@@ -63,9 +63,9 @@ users.newUser = function (query) {
       return q.Promise(function (resolve, reject, notify) {
         var mailOptions = {
           to: email,
-          from: '{website name} <noreply@{website name}.com>',
-          subject: 'Verify Email - {website name}',
-          text: 'An email verification has been requested for your {website name} account. \n \n To verify your email for {website name}, please visit this link: \n https://{website name}.com/verifyNewEmail/'+ encodeURIComponent(user_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using {website name}!'
+          from: 'oauthexample <oauthexamplemail@gmail.com>',
+          subject: 'Verify Email - oauthexample.com',
+          text: 'An email verification has been requested for your oauthexample account. \n \n To verify your email for oauthexample, please visit this link: \n https://oauthexample.com/verifyNewEmail/'+ encodeURIComponent(user_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using oauthexample!'
         };
 
         nm.sendMail(mailOptions, function(error, info) {
@@ -189,9 +189,9 @@ users.sendRecoveryEmail = function (query) {
       return q.Promise(function (resolve, reject, notify) {
         var mailOptions = {
           to: email,
-          from: '{website name} <noreply@{website name}.com>',
-          subject: 'Account Recovery - {website name}',
-          text: 'A password reset has been requested for your {website name} account. \n \n If you did not make this request, you can safely ignore this email. A password reset request can be made by anyone, and it does not indicate that your account is in any danger of being accessed by someone else. \n \n If you do actually want to reset your password, visit this link: \n https://{website name}.com/verifyRecoveryEmail/'+ encodeURIComponent(user_id) +'/'+ encodeURIComponent(recovery_key) + '\n \n Thank you for using {website name}!'
+          from: 'oauthexample <oauthexamplemail@gmail.com>',
+          subject: 'Account Recovery - oauthexample.com',
+          text: 'A password reset has been requested for your oauthexample account. \n \n If you did not make this request, you can safely ignore this email. A password reset request can be made by anyone, and it does not indicate that your account is in any danger of being accessed by someone else. \n \n If you do actually want to reset your password, visit this link: \n https://oauthexample.com/verifyRecoveryEmail/'+ encodeURIComponent(user_id) +'/'+ encodeURIComponent(recovery_key) + '\n \n Thank you for using oauthexample!'
         };
 
         nm.sendMail(mailOptions, function(error, info) {
@@ -333,9 +333,9 @@ users.newEmail = function (auth, query) {
       return q.Promise(function (resolve, reject, notify) {
         var mailOptions = {
           to: email,
-          from: '{website name} <noreply@{website name}.com>',
-          subject: 'Verify Email - {website name}',
-          text: 'An email verification has been requested for your {website name} account. \n \n To verify your email for {website name}, please visit this link: \n https://{website name}.com/verifyNewEmail/'+ encodeURIComponent(user_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using {website name}!'
+          from: 'oauthexample <oauthexamplemail@gmail.com>',
+          subject: 'Verify Email - oauthexample',
+          text: 'An email verification has been requested for your oauthexample account. \n \n To verify your email for oauthexample, please visit this link: \n https://oauthexample.com/verifyNewEmail/'+ encodeURIComponent(user_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using oauthexample!'
         };
 
         nm.sendMail(mailOptions, function(error, info) {
