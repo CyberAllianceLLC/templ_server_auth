@@ -55,11 +55,12 @@ SETUP
  - push the code to the server (windows)  
  `$ type node.tar.gz | ssh root@<IP address> "dokku tar:in my-server"`  
   
-## setup domain (server)
+## setup domain (server)  
+ - add website domains  
  `$ dokku domains:add my-server <website>.com www.<website>.com`  
  - point domain DNS "A" records to website IP address  
- `$ dokku domains:report my-server`  
  - show all websites associated with my-server.  
+ `$ dokku domains:report my-server`  
    
 ## proxy port change for http domain (server)
  - you can view the current proxy ports by running  
