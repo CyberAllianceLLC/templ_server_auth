@@ -393,47 +393,6 @@ users.verifyNewEmail = function (query) {
   });
 };
 
-//DONE: *deleteUser (user_id) <password>
-users.deleteUser = function (auth, query) {
-  return q.fcall(function () {
-    //FILTER
-    j.assert(query, {
-      password: j.string().min(6).required()
-    });
-
-    return {
-      user_id: auth.user_id,
-      password: query.password
-    };
-  }).then(function (data) {
-    //QUERY
-    return knex('users')
-    .select([
-      'salt'
-    ])
-    .where('user_id', '=', data.user_id)
-    .then(function (user) {
-      //not empty
-      j.assert(user, j.array().min(1).required());
-
-      //recreate password hash, with password and salt
-      var passwordHash = crypto.pbkdf2Sync(data.password, user[0].salt, 50000, 256, 'sha256').toString('base64');
-
-      //delete user
-      return knex('users')
-      .del()
-      .where('user_id', '=', data.user_id)
-      .where('password', '=', passwordHash)
-      .returning(['user_id'])
-    });
-
-  }).then(function (data) {
-    //AFTER
-    j.assert(data, j.array().min(1).required());
-    return 'user deleted';
-  });
-};
-
 //DONE: *newPassword (ip_address) (user_id) <password> <new_password>
 users.newPassword = function (ip_address, auth, query) {
   return q.fcall(function () {
@@ -503,6 +462,47 @@ users.newPassword = function (ip_address, auth, query) {
       });
     });
 
+  });
+};
+
+//DONE: *deleteUser (user_id) <password>
+users.deleteUser = function (auth, query) {
+  return q.fcall(function () {
+    //FILTER
+    j.assert(query, {
+      password: j.string().min(6).required()
+    });
+
+    return {
+      user_id: auth.user_id,
+      password: query.password
+    };
+  }).then(function (data) {
+    //QUERY
+    return knex('users')
+    .select([
+      'salt'
+    ])
+    .where('user_id', '=', data.user_id)
+    .then(function (user) {
+      //not empty
+      j.assert(user, j.array().min(1).required());
+
+      //recreate password hash, with password and salt
+      var passwordHash = crypto.pbkdf2Sync(data.password, user[0].salt, 50000, 256, 'sha256').toString('base64');
+
+      //delete user
+      return knex('users')
+      .del()
+      .where('user_id', '=', data.user_id)
+      .where('password', '=', passwordHash)
+      .returning(['user_id'])
+    });
+
+  }).then(function (data) {
+    //AFTER
+    j.assert(data, j.array().min(1).required());
+    return 'user deleted';
   });
 };
 

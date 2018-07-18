@@ -220,9 +220,10 @@ router.post('/verifyNewEmail', function (req, res, next) {
   });
 });
 
-//DONE: *deleteUser (user_id) <password>
-router.post('/deleteUser', mid.auth, function (req, res, next) {
-  lib.users.deleteUser(req.auth, req.body).then(function (data) {
+//DONE: *newPassword (ip_address) (user_id) <password> <new_password>
+router.post('/newPassword', mid.auth, function (req, res, next) {
+  var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim();
+  lib.users.newPassword(ip, req.auth, req.body).then(function (data) {
     res.json({
       success: true,
       response: data
@@ -235,10 +236,9 @@ router.post('/deleteUser', mid.auth, function (req, res, next) {
   });
 });
 
-//DONE: *newPassword (ip_address) (user_id) <password> <new_password>
-router.post('/newPassword', mid.auth, function (req, res, next) {
-  var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim();
-  lib.users.newPassword(ip, req.auth, req.body).then(function (data) {
+//DONE: *deleteUser (user_id) <password>
+router.post('/deleteUser', mid.auth, function (req, res, next) {
+  lib.users.deleteUser(req.auth, req.body).then(function (data) {
     res.json({
       success: true,
       response: data
