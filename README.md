@@ -1,4 +1,4 @@
-# Template Server Authenticated
+# OAuth Server Boilerplate Example
 
 This is a template node server with OAuth authentication using Dokku.  
   
