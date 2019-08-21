@@ -36,6 +36,6 @@ Promise.resolve().then(() => {
   });
 }).then(() => {
   process.exit(0);
-}).catch(()=> {
+}).catch(() => {
   process.exit(0);
 });

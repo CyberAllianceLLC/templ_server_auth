@@ -56,60 +56,6 @@ oauth.newAuthToken = (query) => {
   });
 };
 
-//DONE: newApiAuthToken <apiToken>
-oauth.newApiAuthToken = (query) => {
-  return Promise.resolve().then(() => {
-    //FILTER
-    j.assert(query, {
-      apiToken: j.string().required()
-    });
-
-    //verify signature
-    let decoded = jwt.verify(query.apiToken, lib.config.JWT);
-
-    //verify api token
-    j.assert(decoded.type, 'api');
-
-    return {
-      token_id: decoded.token_id
-    };
-  }).then((data) => {
-    //QUERY
-    //verify api token
-    return knex('tokens')
-    .select([
-      'token_id',
-      'user_id',
-      'holder',
-      'name',
-      'scope'
-    ])
-    .where('token_id', '=', data.token_id)
-    .whereRaw('user_id = holder')
-    .where('type', '=', 'api');
-
-  }).then((data) => {
-    //AFTER
-    j.assert(data, j.array().min(1).required());
-
-    //create new auth token
-    let authToken = jwt.sign({
-      token_id: data[0].token_id,
-      user_id: data[0].user_id,
-      holder: data[0].holder,
-      type: 'auth',
-      name: data[0].name,
-      scope: data[0].scope
-    }, lib.config.JWT, {
-      expiresIn: lib.config.TOKENS.authTokenExpire
-    });
-
-    return {
-      authToken: authToken
-    };
-  });
-};
-
 //DONE: *newVendorAccessToken (user_id, holder) <holder> <redirect_uri> <[scope]>
 oauth.newVendorAccessToken = (auth, query) => {
   return Promise.resolve().then(() => {

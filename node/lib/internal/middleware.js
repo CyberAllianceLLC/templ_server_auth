@@ -26,16 +26,16 @@ middleware.auth = (req, res, next) => {
       return decoded;
     } else if(decoded.type === 'api') {
       return knex('tokens')
-        .where('user_id', decoded.user_id)
-        .where('token_id', decoded.token_id)
-        .where('type', 'api')
-        .where('holder', decoded.user_id)
-        .select(['token_id'])
-        .then((token) => {
-          // verify token exists
-          j.assert(token, j.array().min(1).required());
-          return decoded;
-        });
+      .select(['token_id'])
+      .where('token_id', decoded.token_id)
+      .where('user_id', decoded.user_id)
+      .where('holder', decoded.user_id)
+      .where('type', 'api')
+      .then((token) => {
+        // verify token exists
+        j.assert(token, j.array().min(1).required());
+        return decoded;
+      });
     } else {
       throw 'invalid token type';
     }
