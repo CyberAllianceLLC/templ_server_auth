@@ -3,5 +3,3 @@ node_modules/
 config.js
 node.tar
 node.tar.gz
-test.js
-package-lock.json

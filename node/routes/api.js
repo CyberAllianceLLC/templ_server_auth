@@ -1,19 +1,19 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var lib = require('../lib/index.js');
-var mid = lib.middleware;
+const lib = require('../lib/index.js');
+const mid = lib.middleware;
 
 
 //===== OAUTH =====
 //DONE: newAuthToken <refreshToken>
-router.post('/newAuthToken', function (req, res, next) {
-  lib.oauth.newAuthToken(req.body).then(function (data) {
+router.post('/newAuthToken', (req, res, next) => {
+  lib.oauth.newAuthToken(req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -22,13 +22,13 @@ router.post('/newAuthToken', function (req, res, next) {
 });
 
 //DONE: newApiAuthToken <apiToken>
-router.post('/newApiAuthToken', function (req, res, next) {
-  lib.oauth.newApiAuthToken(req.body).then(function (data) {
+router.post('/newApiAuthToken', (req, res, next) => {
+  lib.oauth.newApiAuthToken(req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -37,13 +37,13 @@ router.post('/newApiAuthToken', function (req, res, next) {
 });
 
 //DONE: *newVendorAccessToken (user_id, holder) <holder> <redirect_uri> <[scope]>
-router.post('/newVendorAccessToken', mid.auth, function (req, res, next) {
-  lib.oauth.newVendorAccessToken(req.auth, req.body).then(function (data) {
+router.post('/newVendorAccessToken', mid.auth, (req, res, next) => {
+  lib.oauth.newVendorAccessToken(req.auth, req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -52,13 +52,13 @@ router.post('/newVendorAccessToken', mid.auth, function (req, res, next) {
 });
 
 //DONE: *newVendorAuthToken (user_id, holder) <accessToken> <redirect_uri> <[scope]>
-router.post('/newVendorAuthToken', mid.auth, function (req, res, next) {
-  lib.oauth.newVendorAuthToken(req.auth, req.body).then(function (data) {
+router.post('/newVendorAuthToken', mid.auth, (req, res, next) => {
+  lib.oauth.newVendorAuthToken(req.auth, req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -67,13 +67,13 @@ router.post('/newVendorAuthToken', mid.auth, function (req, res, next) {
 });
 
 //DONE: *newApiToken (user_id, holder) <name> <[scope]>
-router.post('/newApiToken', mid.auth, function (req, res, next) {
-  lib.oauth.newApiToken(req.auth, req.body).then(function (data) {
+router.post('/newApiToken', mid.auth, (req, res, next) => {
+  lib.oauth.newApiToken(req.auth, req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -82,13 +82,13 @@ router.post('/newApiToken', mid.auth, function (req, res, next) {
 });
 
 //DONE: *getUserTokenInfo (user_id)
-router.post('/getUserTokenInfo', mid.auth, function (req, res, next) {
-  lib.oauth.getUserTokenInfo(req.auth, req.body).then(function (data) {
+router.post('/getUserTokenInfo', mid.auth, (req, res, next) => {
+  lib.oauth.getUserTokenInfo(req.auth, req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -97,13 +97,13 @@ router.post('/getUserTokenInfo', mid.auth, function (req, res, next) {
 });
 
 //DONE: *deleteTokens (user_id) <[token_id]>
-router.post('/deleteTokens', mid.auth, function (req, res, next) {
-  lib.oauth.deleteTokens(req.auth, req.body).then(function (data) {
+router.post('/deleteTokens', mid.auth, (req, res, next) => {
+  lib.oauth.deleteTokens(req.auth, req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -114,13 +114,13 @@ router.post('/deleteTokens', mid.auth, function (req, res, next) {
 
 //===== USERS =====
 //DONE: newUser <email> <password>
-router.post('/newUser', function (req, res, next) {
-  lib.users.newUser(req.body).then(function (data) {
+router.post('/newUser', (req, res, next) => {
+  lib.users.newUser(req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -129,14 +129,14 @@ router.post('/newUser', function (req, res, next) {
 });
 
 //DONE: loginUser (ip_address) <email> <password>
-router.post('/loginUser', function (req, res, next) {
-  var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim();
-  lib.users.loginUser(ip, req.body).then(function (data) {
+router.post('/loginUser', (req, res, next) => {
+  let ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim();
+  lib.users.loginUser(ip, req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -145,13 +145,13 @@ router.post('/loginUser', function (req, res, next) {
 });
 
 //DONE: sendRecoveryEmail <email>
-router.post('/sendRecoveryEmail', function (req, res, next) {
-  lib.users.sendRecoveryEmail(req.body).then(function (data) {
+router.post('/sendRecoveryEmail', (req, res, next) => {
+  lib.users.sendRecoveryEmail(req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -160,14 +160,14 @@ router.post('/sendRecoveryEmail', function (req, res, next) {
 });
 
 //DONE: verifyRecoveryEmail (ip_address) <user_id> <new_password> <recovery_key>
-router.post('/verifyRecoveryEmail', function (req, res, next) {
-  var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim();
-  lib.users.verifyRecoveryEmail(ip, req.body).then(function (data) {
+router.post('/verifyRecoveryEmail', (req, res, next) => {
+  let ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim();
+  lib.users.verifyRecoveryEmail(ip, req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -176,13 +176,13 @@ router.post('/verifyRecoveryEmail', function (req, res, next) {
 });
 
 //DONE: *getUserInfo (user_id)
-router.post('/getUserInfo', mid.auth, function (req, res, next) {
-  lib.users.getUserInfo(req.auth).then(function (data) {
+router.post('/getUserInfo', mid.auth, (req, res, next) => {
+  lib.users.getUserInfo(req.auth).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -191,13 +191,13 @@ router.post('/getUserInfo', mid.auth, function (req, res, next) {
 });
 
 //DONE: *newEmail (user_id) <email>
-router.post('/newEmail', mid.auth, function (req, res, next) {
-  lib.users.newEmail(req.auth, req.body).then(function (data) {
+router.post('/newEmail', mid.auth, (req, res, next) => {
+  lib.users.newEmail(req.auth, req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -206,13 +206,13 @@ router.post('/newEmail', mid.auth, function (req, res, next) {
 });
 
 //DONE: verifyNewEmail <user_id> <new_email> <recovery_key>
-router.post('/verifyNewEmail', function (req, res, next) {
-  lib.users.verifyNewEmail(req.body).then(function (data) {
+router.post('/verifyNewEmail', (req, res, next) => {
+  lib.users.verifyNewEmail(req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -221,14 +221,14 @@ router.post('/verifyNewEmail', function (req, res, next) {
 });
 
 //DONE: *newPassword (ip_address) (user_id) <password> <new_password>
-router.post('/newPassword', mid.auth, function (req, res, next) {
-  var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim();
-  lib.users.newPassword(ip, req.auth, req.body).then(function (data) {
+router.post('/newPassword', mid.auth, (req, res, next) => {
+  let ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim();
+  lib.users.newPassword(ip, req.auth, req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'
@@ -237,13 +237,13 @@ router.post('/newPassword', mid.auth, function (req, res, next) {
 });
 
 //DONE: *deleteUser (user_id) <password>
-router.post('/deleteUser', mid.auth, function (req, res, next) {
-  lib.users.deleteUser(req.auth, req.body).then(function (data) {
+router.post('/deleteUser', mid.auth, (req, res, next) => {
+  lib.users.deleteUser(req.auth, req.body).then((data) => {
     res.json({
       success: true,
       response: data
     });
-  }).catch(function (error) {
+  }).catch((error) => {
     res.json({
       success: false,
       response: 'request failed'

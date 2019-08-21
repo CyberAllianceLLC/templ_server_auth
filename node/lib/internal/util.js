@@ -1,17 +1,16 @@
-var q = require('q');
-var j = require('joi');
-var shortid = require('shortid');
-var jwt = require('jsonwebtoken');
+const j = require('@hapi/joi');
+const shortid = require('shortid');
+const jwt = require('jsonwebtoken');
 
-var lib = require('../index.js');
-var knex = lib.config.DB;
+const lib = require('../index.js');
+const knex = lib.config.DB;
 
-var util = {};
+let util = {};
 
 
 //DONE: newRefreshToken <user_id> <holder> <name> <[scope]>
-util.newRefreshToken = function (query) {
-  return q.fcall(function () {
+util.newRefreshToken = (query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       user_id: j.string().required(),
@@ -26,7 +25,7 @@ util.newRefreshToken = function (query) {
       name: query.name,
       scope: query.scope
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     return knex('tokens')
     .insert({
@@ -46,12 +45,12 @@ util.newRefreshToken = function (query) {
       'scope'
     ]);
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     j.assert(data, j.array().min(1).required());
 
     //create refresh token
-    var refreshToken = jwt.sign({
+    let refreshToken = jwt.sign({
       token_id: data[0].token_id,
       user_id: data[0].user_id,
       holder: data[0].holder,
@@ -63,7 +62,7 @@ util.newRefreshToken = function (query) {
     });
 
     //create auth token
-    var authToken = jwt.sign({
+    let authToken = jwt.sign({
       token_id: data[0].token_id,
       user_id: data[0].user_id,
       holder: data[0].holder,
@@ -82,13 +81,13 @@ util.newRefreshToken = function (query) {
 };
 
 //DONE: deleteAllSessions <user_id>
-util.deleteAllSessions = function (query) {
-  return q.fcall(function () {
+util.deleteAllSessions = (query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     return {
       user_id: query.user_id
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     return knex('tokens')
     .del()
@@ -96,7 +95,7 @@ util.deleteAllSessions = function (query) {
     .where('holder', '=', data.user_id)
     .where('type', '=', 'refresh')
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     return 'sessions deleted';
   });

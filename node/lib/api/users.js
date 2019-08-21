@@ -1,20 +1,19 @@
-var q = require('q');
-var j = require('joi');
-var shortid = require('shortid');
-var crypto = require('crypto');
-var nodemailer = require('nodemailer');
+const j = require('@hapi/joi');
+const shortid = require('shortid');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
-var lib = require('../index.js');
-var knex = lib.config.DB;
+const lib = require('../index.js');
+const knex = lib.config.DB;
 
-var nm = nodemailer.createTransport(lib.config.SMTP);
+const nm = nodemailer.createTransport(lib.config.SMTP);
 
-var users = {};
+let users = {};
 
 
 //DONE: newUser <email> <password>
-users.newUser = function (query) {
-  return q.fcall(function () {
+users.newUser = (query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       email: j.string().email().required(),
@@ -22,13 +21,13 @@ users.newUser = function (query) {
     });
 
     //create salt
-    var salt = crypto.randomBytes(64).toString('base64');
+    let salt = crypto.randomBytes(64).toString('base64');
 
     //create password hash
-    var passwordHash = crypto.pbkdf2Sync(query.password, salt, 50000, 256, 'sha256').toString('base64');
+    let passwordHash = crypto.pbkdf2Sync(query.password, salt, 50000, 256, 'sha256').toString('base64');
 
     //create recovery key
-    var recovery_key = crypto.randomBytes(64).toString('base64');
+    let recovery_key = crypto.randomBytes(64).toString('base64');
 
     return {
       email: query.email.toLowerCase(),
@@ -36,7 +35,7 @@ users.newUser = function (query) {
       password: passwordHash,
       recovery_key: recovery_key
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     //create new user
     return knex('users')
@@ -51,24 +50,24 @@ users.newUser = function (query) {
       'user_id',
       'email',
       'recovery_key'
-    ]).then(function (user) {
+    ]).then((user) => {
       //send verification email
       j.assert(user, j.array().min(1).required());
 
-      var user_id = user[0].user_id;
-      var email = user[0].email;
-      var recovery_key = user[0].recovery_key;
+      let user_id = user[0].user_id;
+      let email = user[0].email;
+      let recovery_key = user[0].recovery_key;
 
       //send email through SMTP
-      return q.Promise(function (resolve, reject, notify) {
-        var mailOptions = {
+      return new Promise((resolve, reject) => {
+        let mailOptions = {
           to: email,
           from: 'oauthexample <oauthexamplemail@gmail.com>',
           subject: 'Verify Email - oauthexample.com',
           text: 'An email verification has been requested for your oauthexample account. \n \n To verify your email for oauthexample, please visit this link: \n https://oauthexample.com/verifyNewEmail/'+ encodeURIComponent(user_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using oauthexample!'
         };
 
-        nm.sendMail(mailOptions, function(error, info) {
+        nm.sendMail(mailOptions, (error, info) => {
           if(error){
             reject(error);
           }else{
@@ -79,15 +78,15 @@ users.newUser = function (query) {
 
     });
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     return 'email sent';
   });
 };
 
 //DONE: loginUser (ip_address) <email> <password>
-users.loginUser = function (ip_address, query) {
-  return q.fcall(function () {
+users.loginUser = (ip_address, query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       email: j.string().email().required(),
@@ -98,7 +97,7 @@ users.loginUser = function (ip_address, query) {
       email: query.email.toLowerCase(),
       password: query.password
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     //get password and salt of user
     return knex('users')
@@ -110,12 +109,12 @@ users.loginUser = function (ip_address, query) {
     .where('verified', '=', true)
     .where('email', '=', data.email)
     .where('login_attempt', '<=', 6)
-    .then(function (user) {
+    .then((user) => {
       //not empty
       j.assert(user, j.array().min(1).required());
 
       //recreate password hash, with password and salt
-      var passwordHash = crypto.pbkdf2Sync(data.password, user[0].salt, 50000, 256, 'sha256').toString('base64');
+      let passwordHash = crypto.pbkdf2Sync(data.password, user[0].salt, 50000, 256, 'sha256').toString('base64');
 
       //check if user hash matches
       if(user[0].password === passwordHash){
@@ -131,14 +130,14 @@ users.loginUser = function (ip_address, query) {
           login_attempt: knex.raw('login_attempt + 1')
         })
         .where('user_id', '=', user[0].user_id)
-        .then(function () {
+        .then(() => {
           throw new Error('login failed');
         });
 
       }
     });
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     j.assert(data, j.array().min(1).required());
 
@@ -154,8 +153,8 @@ users.loginUser = function (ip_address, query) {
 };
 
 //DONE: sendRecoveryEmail <email>
-users.sendRecoveryEmail = function (query) {
-  return q.fcall(function () {
+users.sendRecoveryEmail = (query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       email: j.string().email().required()
@@ -164,7 +163,7 @@ users.sendRecoveryEmail = function (query) {
     return {
       email: query.email.toLowerCase()
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     //increment email_attempt and prevent too many emails
     return knex('users')
@@ -178,23 +177,23 @@ users.sendRecoveryEmail = function (query) {
       'email',
       'recovery_key'
     ])
-    .then(function (user) {
+    .then((user) => {
       j.assert(user, j.array().min(1).required());
 
-      var user_id = user[0].user_id;
-      var email = user[0].email;
-      var recovery_key = user[0].recovery_key;
+      let user_id = user[0].user_id;
+      let email = user[0].email;
+      let recovery_key = user[0].recovery_key;
 
       //send email through SMTP
-      return q.Promise(function (resolve, reject, notify) {
-        var mailOptions = {
+      return new Promise((resolve, reject) => {
+        let mailOptions = {
           to: email,
           from: 'oauthexample <oauthexamplemail@gmail.com>',
           subject: 'Account Recovery - oauthexample.com',
           text: 'A password reset has been requested for your oauthexample account. \n \n If you did not make this request, you can safely ignore this email. A password reset request can be made by anyone, and it does not indicate that your account is in any danger of being accessed by someone else. \n \n If you do actually want to reset your password, visit this link: \n https://oauthexample.com/verifyRecoveryEmail/'+ encodeURIComponent(user_id) +'/'+ encodeURIComponent(recovery_key) + '\n \n Thank you for using oauthexample!'
         };
 
-        nm.sendMail(mailOptions, function(error, info) {
+        nm.sendMail(mailOptions, (error, info) => {
           if(error){
             reject(error);
           }else{
@@ -205,15 +204,15 @@ users.sendRecoveryEmail = function (query) {
 
     });
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     return 'email sent';
   });
 };
 
 //DONE: verifyRecoveryEmail (ip_address) <user_id> <new_password> <recovery_key>
-users.verifyRecoveryEmail = function (ip_address, query) {
-  return q.fcall(function () {
+users.verifyRecoveryEmail = (ip_address, query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       user_id: j.string().required(),
@@ -222,13 +221,13 @@ users.verifyRecoveryEmail = function (ip_address, query) {
     });
 
     //create new salt
-    var new_salt = crypto.randomBytes(64).toString('base64');
+    let new_salt = crypto.randomBytes(64).toString('base64');
 
     //create new password hash
-    var new_passwordHash = crypto.pbkdf2Sync(query.new_password, new_salt, 50000, 256, 'sha256').toString('base64');
+    let new_passwordHash = crypto.pbkdf2Sync(query.new_password, new_salt, 50000, 256, 'sha256').toString('base64');
 
     //create new recovery key
-    var new_recovery_key = crypto.randomBytes(64).toString('base64');
+    let new_recovery_key = crypto.randomBytes(64).toString('base64');
 
     return {
       user_id: query.user_id,
@@ -237,7 +236,7 @@ users.verifyRecoveryEmail = function (ip_address, query) {
       new_password: new_passwordHash,
       new_recovery_key: new_recovery_key
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     return knex('users')
     .update({
@@ -253,12 +252,12 @@ users.verifyRecoveryEmail = function (ip_address, query) {
       'user_id'
     ]);
 
-  }).then(function (user) {
+  }).then((user) => {
     //AFTER
     j.assert(user, j.array().min(1).required());
 
     //delete old session tokens
-    return lib.util.deleteAllSessions({user_id: user[0].user_id}).then(function () {
+    return lib.util.deleteAllSessions({user_id: user[0].user_id}).then(() => {
       //create new refresh token
       return lib.util.newRefreshToken({
         user_id: user[0].user_id,
@@ -272,13 +271,13 @@ users.verifyRecoveryEmail = function (ip_address, query) {
 };
 
 //DONE: *getUserInfo (user_id)
-users.getUserInfo = function (auth) {
-  return q.fcall(function () {
+users.getUserInfo = (auth) => {
+  return Promise.resolve().then(() => {
     //FILTER
     return {
       user_id: auth.user_id
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     return knex('users')
     .select([
@@ -289,7 +288,7 @@ users.getUserInfo = function (auth) {
     ])
     .where('user_id', '=', data.user_id);
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     j.assert(data, j.array().min(1).required());
     return data[0];
@@ -297,8 +296,8 @@ users.getUserInfo = function (auth) {
 };
 
 //DONE: *newEmail (user_id) <email>
-users.newEmail = function (auth, query) {
-  return q.fcall(function () {
+users.newEmail = (auth, query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       email: j.string().email().required()
@@ -308,7 +307,7 @@ users.newEmail = function (auth, query) {
       user_id: auth.user_id,
       email: query.email.toLowerCase()
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     //get user
     return knex('users')
@@ -321,24 +320,24 @@ users.newEmail = function (auth, query) {
       'user_id',
       'recovery_key'
     ])
-    .then(function (user) {
+    .then((user) => {
       //send email
       j.assert(user, j.array().min(1).required());
 
-      var user_id = user[0].user_id;
-      var email = data.email;
-      var recovery_key = user[0].recovery_key;
+      let user_id = user[0].user_id;
+      let email = data.email;
+      let recovery_key = user[0].recovery_key;
 
       //send email through SMTP
-      return q.Promise(function (resolve, reject, notify) {
-        var mailOptions = {
+      return new Promise((resolve, reject) => {
+        let mailOptions = {
           to: email,
           from: 'oauthexample <oauthexamplemail@gmail.com>',
           subject: 'Verify Email - oauthexample',
           text: 'An email verification has been requested for your oauthexample account. \n \n To verify your email for oauthexample, please visit this link: \n https://oauthexample.com/verifyNewEmail/'+ encodeURIComponent(user_id) +'/'+ encodeURIComponent(recovery_key) +'/'+ encodeURIComponent(email) + '\n \n Thank you for using oauthexample!'
         };
 
-        nm.sendMail(mailOptions, function(error, info) {
+        nm.sendMail(mailOptions, (error, info) => {
           if(error){
             reject(error);
           }else{
@@ -349,15 +348,15 @@ users.newEmail = function (auth, query) {
 
     });
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     return 'email sent';
   });
 };
 
 //DONE: verifyNewEmail <user_id> <new_email> <recovery_key>
-users.verifyNewEmail = function (query) {
-  return q.fcall(function () {
+users.verifyNewEmail = (query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       user_id: j.string().required(),
@@ -370,7 +369,7 @@ users.verifyNewEmail = function (query) {
       new_email: query.new_email.toLowerCase(),
       recovery_key: query.recovery_key
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     return knex('users')
     .update({
@@ -383,19 +382,19 @@ users.verifyNewEmail = function (query) {
     .where('recovery_key', '=', data.recovery_key)
     .returning(['user_id']);
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     j.assert(data, j.array().min(1).required());
     //delete old session tokens
-    return lib.util.deleteAllSessions({user_id: data[0].user_id}).then(function () {
+    return lib.util.deleteAllSessions({user_id: data[0].user_id}).then(() => {
       return 'email updated';
     });
   });
 };
 
 //DONE: *newPassword (ip_address) (user_id) <password> <new_password>
-users.newPassword = function (ip_address, auth, query) {
-  return q.fcall(function () {
+users.newPassword = (ip_address, auth, query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       password: j.string().min(6).required(),
@@ -403,13 +402,13 @@ users.newPassword = function (ip_address, auth, query) {
     });
 
     //create new salt
-    var new_salt = crypto.randomBytes(64).toString('base64');
+    let new_salt = crypto.randomBytes(64).toString('base64');
 
     //create new password hash
-    var new_passwordHash = crypto.pbkdf2Sync(query.new_password, new_salt, 50000, 256, 'sha256').toString('base64');
+    let new_passwordHash = crypto.pbkdf2Sync(query.new_password, new_salt, 50000, 256, 'sha256').toString('base64');
 
     //create new recovery key
-    var new_recovery_key = crypto.randomBytes(64).toString('base64');
+    let new_recovery_key = crypto.randomBytes(64).toString('base64');
 
     return {
       user_id: auth.user_id,
@@ -418,19 +417,19 @@ users.newPassword = function (ip_address, auth, query) {
       new_password: new_passwordHash,
       new_recovery_key: new_recovery_key
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     return knex('users')
     .select([
       'salt'
     ])
     .where('user_id', '=', data.user_id)
-    .then(function (user) {
+    .then((user) => {
       //not empty
       j.assert(user, j.array().min(1).required());
 
       //recreate password hash, with password and salt
-      var passwordHash = crypto.pbkdf2Sync(data.password, user[0].salt, 50000, 256, 'sha256').toString('base64');
+      let passwordHash = crypto.pbkdf2Sync(data.password, user[0].salt, 50000, 256, 'sha256').toString('base64');
 
       //update user
       return knex('users')
@@ -447,12 +446,12 @@ users.newPassword = function (ip_address, auth, query) {
       ]);
     });
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     j.assert(data, j.array().min(1).required());
 
     //delete old session tokens
-    return lib.util.deleteAllSessions({user_id: data[0].user_id}).then(function () {
+    return lib.util.deleteAllSessions({user_id: data[0].user_id}).then(() => {
       //create and return new refresh token
       return lib.util.newRefreshToken({
         user_id: data[0].user_id,
@@ -466,8 +465,8 @@ users.newPassword = function (ip_address, auth, query) {
 };
 
 //DONE: *deleteUser (user_id) <password>
-users.deleteUser = function (auth, query) {
-  return q.fcall(function () {
+users.deleteUser = (auth, query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       password: j.string().min(6).required()
@@ -477,19 +476,19 @@ users.deleteUser = function (auth, query) {
       user_id: auth.user_id,
       password: query.password
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     return knex('users')
     .select([
       'salt'
     ])
     .where('user_id', '=', data.user_id)
-    .then(function (user) {
+    .then((user) => {
       //not empty
       j.assert(user, j.array().min(1).required());
 
       //recreate password hash, with password and salt
-      var passwordHash = crypto.pbkdf2Sync(data.password, user[0].salt, 50000, 256, 'sha256').toString('base64');
+      let passwordHash = crypto.pbkdf2Sync(data.password, user[0].salt, 50000, 256, 'sha256').toString('base64');
 
       //delete user
       return knex('users')
@@ -499,7 +498,7 @@ users.deleteUser = function (auth, query) {
       .returning(['user_id'])
     });
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     j.assert(data, j.array().min(1).required());
     return 'user deleted';

@@ -1,18 +1,16 @@
-var q = require('q');
-
-var knex = require('knex')({
+const knex = require('knex')({
   client: 'pg',
   connection: ((process.env['DSN']) ? process.env['DSN'] : 'postgres://postgres:@db:5432/postgres'),
   debug: true
 });
 
 //===== MODELS =====
-q.fcall(function() {
+Promise.resolve().then(() => {
   //DONE: initialize
   return knex.raw('CREATE EXTENSION pg_trgm'); //search module
-}).then(function (data) {
+}).then((data) => {
   //DONE: users
-  return knex.schema.createTable('users', function(table) {
+  return knex.schema.createTable('users', (table) => {
     table.string('user_id', 15).notNullable().primary().unique();
     table.string('email', 50).notNullable().unique().index();
     table.boolean('verified').notNullable().defaultTo(false);
@@ -24,9 +22,9 @@ q.fcall(function() {
     table.timestamp('updated_at').notNullable().defaultTo(knex.raw('now()'));
     table.timestamp('created_at').notNullable().defaultTo(knex.raw('now()')).index();
   });
-}).then(function (data) {
+}).then((data) => {
   //DONE: tokens
-  return knex.schema.createTable('tokens', function(table) {
+  return knex.schema.createTable('tokens', (table) => {
     table.string('token_id', 15).notNullable().primary().unique();
     table.string('user_id', 15).notNullable().references('users.user_id').onDelete('CASCADE').index();
     table.string('holder', 15).notNullable().references('users.user_id').onDelete('CASCADE').index();
@@ -36,6 +34,6 @@ q.fcall(function() {
     table.timestamp('expires').notNullable();
     table.timestamp('created_at').notNullable().defaultTo(knex.raw('now()')).index();
   });
-}).finally(function() {
+}).finally(() => {
   process.exit(0);
 });

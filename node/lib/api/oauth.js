@@ -1,26 +1,25 @@
-var q = require('q');
-var j = require('joi');
-var shortid = require('shortid');
-var jwt = require('jsonwebtoken');
-var _ = require('lodash');
-var urijs = require('urijs');
+const j = require('@hapi/joi');
+const shortid = require('shortid');
+const jwt = require('jsonwebtoken');
+const _ = require('lodash');
+const urijs = require('urijs');
 
-var lib = require('../index.js');
-var knex = lib.config.DB;
+const lib = require('../index.js');
+const knex = lib.config.DB;
 
-var oauth = {};
+let oauth = {};
 
 
 //DONE: newAuthToken <refreshToken>
-oauth.newAuthToken = function (query) {
-  return q.fcall(function () {
+oauth.newAuthToken = (query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       refreshToken: j.string().required()
     });
 
     //verify signature
-    var decoded = jwt.verify(query.refreshToken, lib.config.JWT);
+    let decoded = jwt.verify(query.refreshToken, lib.config.JWT);
 
     //verify token is refresh token
     j.assert(decoded.type, 'refresh');
@@ -28,7 +27,7 @@ oauth.newAuthToken = function (query) {
     return {
       token_id: decoded.token_id
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     //delete refresh token
     return knex('tokens')
@@ -42,7 +41,7 @@ oauth.newAuthToken = function (query) {
       'scope'
     ]);
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     j.assert(data, j.array().min(1).required());
 
@@ -58,15 +57,15 @@ oauth.newAuthToken = function (query) {
 };
 
 //DONE: newApiAuthToken <apiToken>
-oauth.newApiAuthToken = function (query) {
-  return q.fcall(function () {
+oauth.newApiAuthToken = (query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       apiToken: j.string().required()
     });
 
     //verify signature
-    var decoded = jwt.verify(query.apiToken, lib.config.JWT);
+    let decoded = jwt.verify(query.apiToken, lib.config.JWT);
 
     //verify api token
     j.assert(decoded.type, 'api');
@@ -74,7 +73,7 @@ oauth.newApiAuthToken = function (query) {
     return {
       token_id: decoded.token_id
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     //verify api token
     return knex('tokens')
@@ -89,12 +88,12 @@ oauth.newApiAuthToken = function (query) {
     .whereRaw('user_id = holder')
     .where('type', '=', 'api');
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     j.assert(data, j.array().min(1).required());
 
     //create new auth token
-    var authToken = jwt.sign({
+    let authToken = jwt.sign({
       token_id: data[0].token_id,
       user_id: data[0].user_id,
       holder: data[0].holder,
@@ -112,8 +111,8 @@ oauth.newApiAuthToken = function (query) {
 };
 
 //DONE: *newVendorAccessToken (user_id, holder) <holder> <redirect_uri> <[scope]>
-oauth.newVendorAccessToken = function (auth, query) {
-  return q.fcall(function () {
+oauth.newVendorAccessToken = (auth, query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       holder: j.string().required(),
@@ -128,8 +127,8 @@ oauth.newVendorAccessToken = function (auth, query) {
     if(auth.user_id === query.holder) throw 'must be a third party holder';
 
     //extract name from redirect_uri
-    var name = '';
-    var redirectUri = new urijs(query.redirect_uri);
+    let name = '';
+    let redirectUri = new urijs(query.redirect_uri);
     if(redirectUri.protocol() === 'https' || redirectUri.protocol() === 'http'){
       name = redirectUri.domain();
     }else{
@@ -143,10 +142,10 @@ oauth.newVendorAccessToken = function (auth, query) {
       name: name,
       scope: query.scope
     };
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     //create access token
-    var accessToken = jwt.sign({
+    let accessToken = jwt.sign({
       token_id: shortid.generate(),
       user_id: data.user_id,
       holder: data.holder,
@@ -165,8 +164,8 @@ oauth.newVendorAccessToken = function (auth, query) {
 };
 
 //DONE: *newVendorAuthToken (user_id, holder) <accessToken> <redirect_uri> <[scope]>
-oauth.newVendorAuthToken = function (auth, query) {
-  return q.fcall(function () {
+oauth.newVendorAuthToken = (auth, query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       accessToken: j.string().required(),
@@ -175,7 +174,7 @@ oauth.newVendorAuthToken = function (auth, query) {
     });
 
     //verify signature
-    var decoded = jwt.verify(query.accessToken, lib.config.JWT);
+    let decoded = jwt.verify(query.accessToken, lib.config.JWT);
 
     //verify token is access token
     j.assert(decoded.type, 'access');
@@ -199,7 +198,7 @@ oauth.newVendorAuthToken = function (auth, query) {
       name: decoded.name,
       scope: decoded.scope
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     return knex('tokens')
     .insert({
@@ -219,12 +218,12 @@ oauth.newVendorAuthToken = function (auth, query) {
       'scope'
     ]);
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     j.assert(data, j.array().min(1).required());
 
     //create refresh token
-    var refreshToken = jwt.sign({
+    let refreshToken = jwt.sign({
       token_id: data[0].token_id,
       user_id: data[0].user_id,
       holder: data[0].holder,
@@ -236,7 +235,7 @@ oauth.newVendorAuthToken = function (auth, query) {
     });
 
     //create auth token
-    var authToken = jwt.sign({
+    let authToken = jwt.sign({
       token_id: data[0].token_id,
       user_id: data[0].user_id,
       holder: data[0].holder,
@@ -255,8 +254,8 @@ oauth.newVendorAuthToken = function (auth, query) {
 };
 
 //DONE: *newApiToken (user_id, holder) <name> <[scope]>
-oauth.newApiToken = function (auth, query) {
-  return q.fcall(function () {
+oauth.newApiToken = (auth, query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       name: j.string().max(100).required(),
@@ -272,7 +271,7 @@ oauth.newApiToken = function (auth, query) {
       name: query.name,
       scope: query.scope
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     return knex('tokens')
     .insert({
@@ -292,12 +291,12 @@ oauth.newApiToken = function (auth, query) {
       'scope'
     ]);
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     j.assert(data, j.array().min(1).required());
 
     //create api token
-    var apiToken = jwt.sign({
+    let apiToken = jwt.sign({
       token_id: data[0].token_id,
       user_id: data[0].user_id,
       holder: data[0].holder,
@@ -315,13 +314,13 @@ oauth.newApiToken = function (auth, query) {
 };
 
 //DONE: *getUserTokenInfo (user_id)
-oauth.getUserTokenInfo = function (auth) {
-  return q.fcall(function () {
+oauth.getUserTokenInfo = (auth) => {
+  return Promise.resolve().then(() => {
     //FILTER
     return {
       user_id: auth.user_id
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     return knex('tokens')
     .select([
@@ -338,15 +337,15 @@ oauth.getUserTokenInfo = function (auth) {
     .orWhere('holder', '=', data.user_id)
     .orderBy('created_at', 'DESC');
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     return data;
   });
 };
 
 //DONE: *deleteTokens (user_id) <[token_id]>
-oauth.deleteTokens = function (auth, query) {
-  return q.fcall(function () {
+oauth.deleteTokens = (auth, query) => {
+  return Promise.resolve().then(() => {
     //FILTER
     j.assert(query, {
       token_id: j.array().items(j.string().required()).required()
@@ -356,16 +355,16 @@ oauth.deleteTokens = function (auth, query) {
       user_id: auth.user_id,
       token_id: query.token_id
     };
-  }).then(function (data) {
+  }).then((data) => {
     //QUERY
     return knex('tokens')
     .del()
     .whereIn('token_id', data.token_id)
-    .where(function(p1) {
+    .where((p1) => {
       p1.where('user_id', '=', data.user_id).orWhere('holder', '=', data.user_id)
     });
 
-  }).then(function (data) {
+  }).then((data) => {
     //AFTER
     return 'tokens deleted';
   });

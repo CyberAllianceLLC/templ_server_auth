@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "knex": "^0.14.6",
+    "knex": "^0.19.2",
     "pg": "^7.4.3",
     "q": "^1.4.1"
   }

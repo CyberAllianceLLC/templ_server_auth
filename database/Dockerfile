@@ -1,4 +1,4 @@
-FROM node:8.1
+FROM node:lts
 
 # Start
 WORKDIR ./app

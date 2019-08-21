@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:lts
 
 # Start
 ENV NODE_ENV="production"

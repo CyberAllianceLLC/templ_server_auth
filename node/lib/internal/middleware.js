@@ -1,37 +1,36 @@
-var q = require('q');
-var j = require('joi');
-var jwt = require('jsonwebtoken');
-var _ = require('lodash');
+const j = require('@hapi/joi');
+const jwt = require('jsonwebtoken');
+const _ = require('lodash');
 
-var lib = require('../index.js');
+const lib = require('../index.js');
 
-var middleware = {};
+let middleware = {};
 
 
 //DONE: auth
-middleware.auth = function(req, res, next) {
-  q.fcall(function() {
+middleware.auth = (req, res, next) => {
+  Promise.resolve().then(() => {
     //auth token
-    var authToken = _.replace(req.headers['authorization'], 'Bearer ', '');
+    let authToken = _.replace(req.headers['authorization'], 'Bearer ', '');
 
     //verify token
-    var decoded = jwt.verify(authToken, lib.config.JWT);
+    let decoded = jwt.verify(authToken, lib.config.JWT);
 
     //verify token is an auth token
     j.assert(decoded.type, 'auth');
 
     //check if user has permission to this address
-    var address = _.replace(req.url, '/', '');
+    let address = _.replace(req.url, '/', '');
     j.assert(address, j.string().valid(decoded.scope).required());
 
     return decoded;
 
-  }).then(function(data) {
+  }).then((data) => {
     //user is authenticated
     req.auth = data;
     next();
 
-  }).catch(function(error) {
+  }).catch((error) => {
     //user is not authenticated
     res.json({
       success: false,
