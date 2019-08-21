@@ -74,8 +74,8 @@ util.newRefreshToken = (query) => {
     });
 
     return {
-      refreshToken: refreshToken,
-      authToken: authToken
+      authToken: authToken,
+      refreshToken: refreshToken
     };
   });
 };

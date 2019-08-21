@@ -34,6 +34,8 @@ Promise.resolve().then(() => {
     table.timestamp('expires').notNullable();
     table.timestamp('created_at').notNullable().defaultTo(knex.raw('now()')).index();
   });
-}).finally(() => {
+}).then(() => {
+  process.exit(0);
+}).catch(()=> {
   process.exit(0);
 });
