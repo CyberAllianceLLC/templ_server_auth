@@ -24,7 +24,9 @@ middleware.auth = (req, res, next) => {
     //verify token is an auth token
     if(decoded.type === 'auth') {
       return decoded;
-    } else if(decoded.type === 'api') {
+    }
+    //verify token is an API token
+    else if(decoded.type === 'api') {
       return knex('tokens')
       .select(['token_id'])
       .where('token_id', decoded.token_id)
@@ -36,16 +38,19 @@ middleware.auth = (req, res, next) => {
         j.assert(token, j.array().min(1).required());
         return decoded;
       });
-    } else {
+    }
+    else {
       throw 'invalid token type';
     }
 
-  }).then((data) => {
-    //user is authenticated
+  })
+  //user is authenticated
+  .then((data) => {
     req.auth = data;
     next();
-  }).catch((error) => {
-    //user is not authenticated
+  })
+  //user is not authenticated
+  .catch((error) => {
     res.json({
       success: false,
       response: 'authentication failed'

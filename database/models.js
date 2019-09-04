@@ -5,11 +5,12 @@ const knex = require('knex')({
 });
 
 //===== MODELS =====
+//DONE: initialize
 Promise.resolve().then(() => {
-  //DONE: initialize
   return knex.raw('CREATE EXTENSION pg_trgm'); //search module
-}).then((data) => {
-  //DONE: users
+})
+//DONE: users
+.then((data) => {
   return knex.schema.createTable('users', (table) => {
     table.string('user_id', 15).notNullable().primary().unique();
     table.string('email', 50).notNullable().unique().index();
@@ -22,8 +23,9 @@ Promise.resolve().then(() => {
     table.timestamp('updated_at').notNullable().defaultTo(knex.raw('now()'));
     table.timestamp('created_at').notNullable().defaultTo(knex.raw('now()')).index();
   });
-}).then((data) => {
-  //DONE: tokens
+})
+//DONE: tokens
+.then((data) => {
   return knex.schema.createTable('tokens', (table) => {
     table.string('token_id', 15).notNullable().primary().unique();
     table.string('user_id', 15).notNullable().references('users.user_id').onDelete('CASCADE').index();
@@ -34,8 +36,11 @@ Promise.resolve().then(() => {
     table.timestamp('expires').notNullable();
     table.timestamp('created_at').notNullable().defaultTo(knex.raw('now()')).index();
   });
-}).then(() => {
+})
+//DONE: EXIT
+.then(() => {
   process.exit(0);
-}).catch(() => {
+})
+.catch(() => {
   process.exit(0);
 });

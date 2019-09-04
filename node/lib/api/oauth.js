@@ -12,8 +12,8 @@ let oauth = {};
 
 //DONE: newAuthToken <refreshToken>
 oauth.newAuthToken = (query) => {
+  //FILTER
   return Promise.resolve().then(() => {
-    //FILTER
     j.assert(query, {
       refreshToken: j.string().required()
     });
@@ -27,9 +27,10 @@ oauth.newAuthToken = (query) => {
     return {
       token_id: decoded.token_id
     };
-  }).then((data) => {
-    //QUERY
-    //delete refresh token
+  })
+  //QUERY
+  //delete refresh token
+  .then((data) => {
     return knex('tokens')
     .del()
     .where('token_id', '=', data.token_id)
@@ -40,9 +41,9 @@ oauth.newAuthToken = (query) => {
       'name',
       'scope'
     ]);
-
-  }).then((data) => {
-    //AFTER
+  })
+  //AFTER
+  .then((data) => {
     j.assert(data, j.array().min(1).required());
 
     //create new refresh token
@@ -52,14 +53,13 @@ oauth.newAuthToken = (query) => {
       name: data[0].name,
       scope: data[0].scope
     });
-
   });
 };
 
 //DONE: *newVendorAccessToken (user_id, holder) <holder> <redirect_uri> <[scope]>
 oauth.newVendorAccessToken = (auth, query) => {
+  //FILTER
   return Promise.resolve().then(() => {
-    //FILTER
     j.assert(query, {
       holder: j.string().required(),
       redirect_uri: j.string().required(),
@@ -77,7 +77,8 @@ oauth.newVendorAccessToken = (auth, query) => {
     let redirectUri = new urijs(query.redirect_uri);
     if(redirectUri.protocol() === 'https' || redirectUri.protocol() === 'http'){
       name = redirectUri.domain();
-    }else{
+    }
+    else{
       name = redirectUri.protocol();
     }
 
@@ -88,8 +89,9 @@ oauth.newVendorAccessToken = (auth, query) => {
       name: name,
       scope: query.scope
     };
-  }).then((data) => {
-    //AFTER
+  })
+  //AFTER
+  .then((data) => {
     //create access token
     let accessToken = jwt.sign({
       token_id: shortid.generate(),
@@ -111,8 +113,8 @@ oauth.newVendorAccessToken = (auth, query) => {
 
 //DONE: *newVendorAuthToken (user_id, holder) <accessToken> <redirect_uri> <[scope]>
 oauth.newVendorAuthToken = (auth, query) => {
+  //FILTER
   return Promise.resolve().then(() => {
-    //FILTER
     j.assert(query, {
       accessToken: j.string().required(),
       redirect_uri: j.string().required(),
@@ -144,8 +146,9 @@ oauth.newVendorAuthToken = (auth, query) => {
       name: decoded.name,
       scope: decoded.scope
     };
-  }).then((data) => {
-    //QUERY
+  })
+  //QUERY
+  .then((data) => {
     return knex('tokens')
     .insert({
       token_id: data.token_id,
@@ -154,7 +157,7 @@ oauth.newVendorAuthToken = (auth, query) => {
       type: 'refresh',
       name: data.name,
       scope: data.scope,
-      expires: knex.raw("now() + (make_interval(secs => 1) * ?) ", [lib.config.TOKENS.refreshTokenExpire])
+      expires: knex.raw('now() + (make_interval(secs => 1) * ?)', [lib.config.TOKENS.refreshTokenExpire])
     })
     .returning([
       'token_id',
@@ -163,9 +166,9 @@ oauth.newVendorAuthToken = (auth, query) => {
       'name',
       'scope'
     ]);
-
-  }).then((data) => {
-    //AFTER
+  })
+  //AFTER
+  .then((data) => {
     j.assert(data, j.array().min(1).required());
 
     //create refresh token
@@ -201,8 +204,8 @@ oauth.newVendorAuthToken = (auth, query) => {
 
 //DONE: *newApiToken (user_id, holder) <name> <[scope]>
 oauth.newApiToken = (auth, query) => {
+  //FILTER
   return Promise.resolve().then(() => {
-    //FILTER
     j.assert(query, {
       name: j.string().max(100).required(),
       scope: j.array().items(j.string().valid(lib.config.TOKENS.api_scope).required()).unique().required()
@@ -217,8 +220,9 @@ oauth.newApiToken = (auth, query) => {
       name: query.name,
       scope: query.scope
     };
-  }).then((data) => {
-    //QUERY
+  })
+  //QUERY
+  .then((data) => {
     return knex('tokens')
     .insert({
       token_id: shortid.generate(),
@@ -227,7 +231,7 @@ oauth.newApiToken = (auth, query) => {
       type: 'api',
       name: data.name,
       scope: data.scope,
-      expires: knex.raw("now() + (make_interval(secs => 1) * ?) ", [lib.config.TOKENS.apiTokenExpire])
+      expires: knex.raw('now() + (make_interval(secs => 1) * ?)', [lib.config.TOKENS.apiTokenExpire])
     })
     .returning([
       'token_id',
@@ -236,9 +240,9 @@ oauth.newApiToken = (auth, query) => {
       'name',
       'scope'
     ]);
-
-  }).then((data) => {
-    //AFTER
+  })
+  //AFTER
+  .then((data) => {
     j.assert(data, j.array().min(1).required());
 
     //create api token
@@ -261,13 +265,14 @@ oauth.newApiToken = (auth, query) => {
 
 //DONE: *getUserTokenInfo (user_id)
 oauth.getUserTokenInfo = (auth) => {
+  //FILTER
   return Promise.resolve().then(() => {
-    //FILTER
     return {
       user_id: auth.user_id
     };
-  }).then((data) => {
-    //QUERY
+  })
+  //QUERY
+  .then((data) => {
     return knex('tokens')
     .select([
       'token_id',
@@ -282,17 +287,17 @@ oauth.getUserTokenInfo = (auth) => {
     .where('user_id', '=', data.user_id)
     .orWhere('holder', '=', data.user_id)
     .orderBy('created_at', 'DESC');
-
-  }).then((data) => {
-    //AFTER
+  })
+  //AFTER
+  .then((data) => {
     return data;
   });
 };
 
 //DONE: *deleteTokens (user_id) <[token_id]>
 oauth.deleteTokens = (auth, query) => {
+  //FILTER
   return Promise.resolve().then(() => {
-    //FILTER
     j.assert(query, {
       token_id: j.array().items(j.string().required()).required()
     });
@@ -301,17 +306,18 @@ oauth.deleteTokens = (auth, query) => {
       user_id: auth.user_id,
       token_id: query.token_id
     };
-  }).then((data) => {
-    //QUERY
+  })
+  //QUERY
+  .then((data) => {
     return knex('tokens')
     .del()
     .whereIn('token_id', data.token_id)
     .where((p1) => {
       p1.where('user_id', '=', data.user_id).orWhere('holder', '=', data.user_id)
     });
-
-  }).then((data) => {
-    //AFTER
+  })
+  //AFTER
+  .then((data) => {
     return 'tokens deleted';
   });
 };

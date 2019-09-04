@@ -10,8 +10,8 @@ let util = {};
 
 //DONE: newRefreshToken <user_id> <holder> <name> <[scope]>
 util.newRefreshToken = (query) => {
+  //FILTER
   return Promise.resolve().then(() => {
-    //FILTER
     j.assert(query, {
       user_id: j.string().required(),
       holder: j.string().required(),
@@ -25,8 +25,9 @@ util.newRefreshToken = (query) => {
       name: query.name,
       scope: query.scope
     };
-  }).then((data) => {
-    //QUERY
+  })
+  //QUERY
+  .then((data) => {
     return knex('tokens')
     .insert({
       token_id: shortid.generate(),
@@ -35,7 +36,7 @@ util.newRefreshToken = (query) => {
       type: 'refresh',
       name: data.name,
       scope: data.scope,
-      expires: knex.raw("now() + (make_interval(secs => 1) * ?) ", [lib.config.TOKENS.refreshTokenExpire])
+      expires: knex.raw('now() + (make_interval(secs => 1) * ?) ', [lib.config.TOKENS.refreshTokenExpire])
     })
     .returning([
       'token_id',
@@ -44,9 +45,9 @@ util.newRefreshToken = (query) => {
       'name',
       'scope'
     ]);
-
-  }).then((data) => {
-    //AFTER
+  })
+  //AFTER
+  .then((data) => {
     j.assert(data, j.array().min(1).required());
 
     //create refresh token
@@ -82,21 +83,22 @@ util.newRefreshToken = (query) => {
 
 //DONE: deleteAllSessions <user_id>
 util.deleteAllSessions = (query) => {
+  //FILTER
   return Promise.resolve().then(() => {
-    //FILTER
     return {
       user_id: query.user_id
     };
-  }).then((data) => {
-    //QUERY
+  })
+  //QUERY
+  .then((data) => {
     return knex('tokens')
     .del()
     .where('user_id', '=', data.user_id)
     .where('holder', '=', data.user_id)
     .where('type', '=', 'refresh')
-
-  }).then((data) => {
-    //AFTER
+  })
+  //AFTER
+  .then((data) => {
     return 'sessions deleted';
   });
 };
